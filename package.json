@@ -1,0 +1,85 @@
+{
+  "name": "reghex",
+  "version": "1.0.0",
+  "description": "The magical sticky regex-based parser generator 🧙",
+  "author": "Phil Pluckthun <phil@kitten.sh>",
+  "license": "MIT",
+  "main": "dist/reghex-core",
+  "module": "dist/reghex-core.mjs",
+  "source": "src/core.js",
+  "files": [
+    "README.md",
+    "LICENSE.md",
+    "dist",
+    "src",
+    "babel.js",
+    "macro.js"
+  ],
+  "exports": {
+    ".": {
+      "import": "./dist/reghex-core.mjs",
+      "require": "./dist/reghex-core.js"
+    },
+    "./babel": {
+      "import": "./dist/reghex-babel.mjs",
+      "require": "./dist/reghex-babel.js"
+    },
+    "./macro": {
+      "import": "./dist/reghex-macro.mjs",
+      "require": "./dist/reghex-macro.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "prepublishOnly": "run-s clean build test",
+    "clean": "rimraf dist ./node_modules/.cache",
+    "build": "rollup -c rollup.config.js",
+    "test": "jest"
+  },
+  "keywords": [
+    "regex",
+    "sticky regex",
+    "parser",
+    "parser generator",
+    "babel"
+  ],
+  "repository": "https://github.com/kitten/reghex",
+  "bugs": {
+    "url": "https://github.com/kitten/reghex/issues"
+  },
+  "devDependencies": {
+    "@babel/core": "7.9.6",
+    "@babel/plugin-transform-modules-commonjs": "^7.9.6",
+    "@babel/plugin-transform-object-assign": "^7.8.3",
+    "@rollup/plugin-buble": "^0.21.3",
+    "@rollup/plugin-commonjs": "^11.1.0",
+    "@rollup/plugin-node-resolve": "^7.1.3",
+    "babel-jest": "^26.0.1",
+    "babel-plugin-closure-elimination": "^1.3.1",
+    "husky": "^4.2.5",
+    "jest": "^26.0.1",
+    "lint-staged": "^10.2.2",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^2.0.5",
+    "rimraf": "^3.0.2",
+    "rollup": "^2.10.2",
+    "rollup-plugin-babel": "^4.4.0"
+  },
+  "prettier": {
+    "singleQuote": true
+  },
+  "lint-staged": {
+    "*.{js,jsx,json,md}": "prettier --write"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged --quiet --relative"
+    }
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "transform": {
+      "\\.js$": "<rootDir>/scripts/jest-transform-esm.js"
+    }
+  }
+}
