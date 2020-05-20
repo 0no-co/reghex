@@ -323,7 +323,7 @@ matched, which would cause other matchers to treat it like a mismatch!
 import match, { parse } from 'reghex';
 
 const name = match('name')((x) => {
-  return x !== 'tim' ? x : undefined;
+  return x[0] !== 'tim' ? x : undefined;
 })`
   ${/\w+/}
 `;
