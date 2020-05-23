@@ -37,17 +37,18 @@ const match = (name) => (quasis, ...expressions) => {
 };
 
 const expectToParse = (node, input, result, lastIndex = 0) => {
-  expect(reghex.parse(node)(input)).toEqual(
+  const state = { input, index: 0 };
+  expect(node(state)).toEqual(
     result === undefined ? result : reghex.tag(result, 'node')
   );
 
   // NOTE: After parsing we expect the current index to exactly match the
   // sum amount of matched characters
   if (result === undefined) {
-    expect(reghex._getLastIndex()).toBe(0);
+    expect(state.index).toBe(0);
   } else {
     const index = lastIndex || result.reduce((acc, x) => acc + x.length, 0);
-    expect(reghex._getLastIndex()).toBe(index);
+    expect(state.index).toBe(index);
   }
 };
 

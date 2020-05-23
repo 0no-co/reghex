@@ -1,9 +1,7 @@
 export class SharedIds {
   constructor(t) {
     this.t = t;
-    this.getLastIndexId = t.identifier('_getLastIndex');
-    this.setLastIndexId = t.identifier('_setLastIndex');
-    this.execPatternId = t.identifier('_execPattern');
+    this.execId = t.identifier('_exec');
     this.patternId = t.identifier('_pattern');
     this.tagId = t.identifier('tag');
   }
@@ -16,16 +14,12 @@ export class SharedIds {
     return this.t.identifier('match');
   }
 
-  get getLastIndex() {
-    return this.t.identifier(this.getLastIndexId.name);
+  get state() {
+    return this.t.identifier('state');
   }
 
-  get setLastIndex() {
-    return this.t.identifier(this.setLastIndexId.name);
-  }
-
-  get execPattern() {
-    return this.t.identifier(this.execPatternId.name);
+  get exec() {
+    return this.t.identifier(this.execId.name);
   }
 
   get pattern() {

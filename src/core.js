@@ -1,16 +1,5 @@
 const isStickySupported = typeof /./g.sticky === 'boolean';
 
-let state$input = '';
-let state$lastIndex = 0;
-
-export const _getLastIndex = () => {
-  return state$lastIndex;
-};
-
-export const _setLastIndex = (index) => {
-  state$lastIndex = index;
-};
-
 export const _pattern = (input) => {
   if (typeof input === 'function') return input;
 
@@ -20,18 +9,18 @@ export const _pattern = (input) => {
     : new RegExp(`^(?:${source})`, 'g');
 };
 
-export const _execPattern = (pattern) => {
+export const _exec = (state, pattern) => {
   if (typeof pattern === 'function') return pattern();
 
   let match;
   if (isStickySupported) {
-    pattern.lastIndex = state$lastIndex;
-    match = pattern.exec(state$input);
-    state$lastIndex = pattern.lastIndex;
+    pattern.lastIndex = state.index;
+    match = pattern.exec(state.input);
+    state.index = pattern.lastIndex;
   } else {
     pattern.lastIndex = 0;
-    match = pattern.exec(state$input.slice(state$lastIndex));
-    state$lastIndex += pattern.lastIndex;
+    match = pattern.exec(state.input.slice(state.input));
+    state.index += pattern.lastIndex;
   }
 
   return match && match[0];
@@ -43,9 +32,8 @@ export const tag = (array, tag) => {
 };
 
 export const parse = (pattern) => (input) => {
-  state$input = input;
-  state$lastIndex = 0;
-  return pattern();
+  const state = { input, index: 0 };
+  return pattern(state);
 };
 
 export const match = (_name) => {

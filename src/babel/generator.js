@@ -6,26 +6,33 @@ export function initGenerator(_ids, _t) {
   t = _t;
 }
 
-/** var id = getLastIndex(); */
+/** var id = state.index; */
 class AssignIndexNode {
   constructor(id) {
     this.id = id;
   }
 
   statement() {
-    const call = t.callExpression(ids.getLastIndex, []);
-    return t.variableDeclaration('var', [t.variableDeclarator(this.id, call)]);
+    const member = t.memberExpression(ids.state, t.identifier('index'));
+    return t.variableDeclaration('var', [
+      t.variableDeclarator(this.id, member),
+    ]);
   }
 }
 
-/** setLastIndex(id); */
+/** state.index = id; */
 class RestoreIndexNode {
   constructor(id) {
     this.id = id;
   }
 
   statement() {
-    const expression = t.callExpression(ids.setLastIndex, [this.id]);
+    const expression = t.assignmentExpression(
+      '=',
+      t.memberExpression(ids.state, t.identifier('index')),
+      this.id
+    );
+
     return t.expressionStatement(expression);
   }
 }
@@ -224,7 +231,7 @@ class QuantifierNode {
     const loopId = t.identifier(`loop_${this.depth}`);
     const iterId = t.identifier(`iter_${this.depth}`);
     const indexId = t.identifier(`index_${this.depth}`);
-    const getLastIndex = t.callExpression(ids.getLastIndex, []);
+    const lastIndex = t.memberExpression(ids.state, t.identifier('index'));
 
     let statements;
     if (quantifier && !quantifier.singular && quantifier.required) {
@@ -239,7 +246,7 @@ class QuantifierNode {
             t.updateExpression('++', iterId),
             t.blockStatement([
               t.variableDeclaration('var', [
-                t.variableDeclarator(indexId, getLastIndex),
+                t.variableDeclarator(indexId, lastIndex),
               ]),
               ...this.childNode.statements(),
             ])
@@ -254,7 +261,7 @@ class QuantifierNode {
             t.booleanLiteral(true),
             t.blockStatement([
               t.variableDeclaration('var', [
-                t.variableDeclarator(indexId, getLastIndex),
+                t.variableDeclarator(indexId, lastIndex),
               ]),
               ...this.childNode.statements(),
             ])
@@ -264,7 +271,7 @@ class QuantifierNode {
     } else if (quantifier && !quantifier.required) {
       statements = [
         t.variableDeclaration('var', [
-          t.variableDeclarator(indexId, getLastIndex),
+          t.variableDeclarator(indexId, lastIndex),
         ]),
         ...this.childNode.statements(),
       ];
@@ -393,12 +400,12 @@ export class RootNode {
 
   statements() {
     const indexId = t.identifier('last_index');
-    const getLastIndex = t.callExpression(ids.getLastIndex, []);
+    const lastIndex = t.memberExpression(ids.state, t.identifier('index'));
 
     return [
       t.variableDeclaration('var', [
         t.variableDeclarator(ids.match),
-        t.variableDeclarator(indexId, getLastIndex),
+        t.variableDeclarator(indexId, lastIndex),
         t.variableDeclarator(
           ids.node,
           t.callExpression(ids.tag, [t.arrayExpression(), this.nameNode])

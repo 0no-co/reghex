@@ -31,20 +31,8 @@ export function makeHelpers(t) {
 
       path.node.specifiers.push(
         t.importSpecifier(
-          (ids.getLastIndexId = path.scope.generateUidIdentifier(
-            'getLastIndex'
-          )),
-          t.identifier('_getLastIndex')
-        ),
-        t.importSpecifier(
-          (ids.setLastIndexId = path.scope.generateUidIdentifier(
-            'setLastIndex'
-          )),
-          t.identifier('_setLastIndex')
-        ),
-        t.importSpecifier(
-          (ids.execPatternId = path.scope.generateUidIdentifier('execPattern')),
-          t.identifier('_execPattern')
+          (ids.execId = path.scope.generateUidIdentifier('exec')),
+          t.identifier('_exec')
         ),
         t.importSpecifier(
           (ids.patternId = path.scope.generateUidIdentifier('pattern')),
@@ -192,10 +180,12 @@ export function makeHelpers(t) {
         const binding = path.scope.getBinding(id.name);
         if (binding && t.isVariableDeclarator(binding.path.node)) {
           const matchPath = binding.path.get('init');
-          if (this.isMatch(matchPath)) return t.callExpression(id, []);
+          if (this.isMatch(matchPath)) {
+            return t.callExpression(id, [ids.state]);
+          }
         }
 
-        return t.callExpression(ids.execPattern, [id]);
+        return t.callExpression(ids.exec, [ids.state, id]);
       });
 
       // Hoist transform argument if necessary
@@ -212,7 +202,11 @@ export function makeHelpers(t) {
       const generator = new RootNode(ast, nameNode, transformNode);
       const body = t.blockStatement(generator.statements());
       const matchFunctionId = path.scope.generateUidIdentifier(matchName);
-      const matchFunction = t.functionExpression(matchFunctionId, [], body);
+      const matchFunction = t.functionExpression(
+        matchFunctionId,
+        [ids.state],
+        body
+      );
       path.replaceWith(matchFunction);
     },
   };

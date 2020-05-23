@@ -8,22 +8,22 @@ var _reghex = require(\\"reghex\\");
 var _node_expression = (0, _reghex._pattern)(1),
     _node_expression2 = (0, _reghex._pattern)(2);
 
-const node = function _node() {
+const node = function _node(state) {
   var match,
-      last_index = (0, _reghex._getLastIndex)(),
+      last_index = state.index,
       node = (0, _reghex.tag)([], 'node');
 
-  if (match = (0, _reghex._execPattern)(_node_expression)) {
+  if (match = (0, _reghex._exec)(state, _node_expression)) {
     node.push(match);
   } else {
-    (0, _reghex._setLastIndex)(last_index);
+    state.index = last_index;
     return;
   }
 
-  if (match = (0, _reghex._execPattern)(_node_expression2)) {
+  if (match = (0, _reghex._exec)(state, _node_expression2)) {
     node.push(match);
   } else {
-    (0, _reghex._setLastIndex)(last_index);
+    state.index = last_index;
     return;
   }
 
@@ -32,36 +32,34 @@ const node = function _node() {
 `;
 
 exports[`works with local recursion 1`] = `
-"import { tag, _getLastIndex, _setLastIndex, _execPattern, _pattern } from 'reghex';
+"import { tag, _exec, _pattern } from 'reghex';
 
 var _inner_expression = _pattern(/inner/);
 
-const inner = function _inner() {
+const inner = function _inner(state) {
   var match,
-      last_index = _getLastIndex(),
+      last_index = state.index,
       node = tag([], 'inner');
 
-  if (match = _execPattern(_inner_expression)) {
+  if (match = _exec(state, _inner_expression)) {
     node.push(match);
   } else {
-    _setLastIndex(last_index);
-
+    state.index = last_index;
     return;
   }
 
   return node;
 };
 
-const node = function _node() {
+const node = function _node(state) {
   var match,
-      last_index = _getLastIndex(),
+      last_index = state.index,
       node = tag([], 'node');
 
-  if (match = inner()) {
+  if (match = inner(state)) {
     node.push(match);
   } else {
-    _setLastIndex(last_index);
-
+    state.index = last_index;
     return;
   }
 
@@ -70,22 +68,21 @@ const node = function _node() {
 `;
 
 exports[`works with non-capturing groups 1`] = `
-"import { _getLastIndex, _setLastIndex, _execPattern, _pattern, tag as _tag } from 'reghex';
+"import { _exec, _pattern, tag as _tag } from 'reghex';
 
 var _node_expression = _pattern(1),
     _node_expression2 = _pattern(2),
     _node_expression3 = _pattern(3);
 
-const node = function _node() {
+const node = function _node(state) {
   var match,
-      last_index = _getLastIndex(),
+      last_index = state.index,
       node = _tag([], 'node');
 
-  if (match = _execPattern(_node_expression)) {
+  if (match = _exec(state, _node_expression)) {
     node.push(match);
   } else {
-    _setLastIndex(last_index);
-
+    state.index = last_index;
     return;
   }
 
@@ -93,15 +90,13 @@ const node = function _node() {
 
   alternation_1: {
     block_1: {
-      var index_1 = _getLastIndex();
+      var index_1 = state.index;
 
-      if (match = _execPattern(_node_expression2)) {
+      if (match = _exec(state, _node_expression2)) {
         node.push(match);
       } else {
         node.length = length_0;
-
-        _setLastIndex(index_1);
-
+        state.index = index_1;
         break block_1;
       }
 
@@ -109,19 +104,16 @@ const node = function _node() {
     }
 
     loop_1: for (var iter_1 = 0; true; iter_1++) {
-      var index_1 = _getLastIndex();
+      var index_1 = state.index;
 
-      if (!_execPattern(_node_expression3)) {
+      if (!_exec(state, _node_expression3)) {
         if (iter_1) {
-          _setLastIndex(index_1);
-
+          state.index = index_1;
           break loop_1;
         }
 
         node.length = length_0;
-
-        _setLastIndex(last_index);
-
+        state.index = last_index;
         return;
       }
     }
@@ -132,7 +124,7 @@ const node = function _node() {
 `;
 
 exports[`works with standard features 1`] = `
-"import { _getLastIndex, _setLastIndex, _execPattern, _pattern, tag as _tag } from \\"reghex\\";
+"import { _exec, _pattern, tag as _tag } from \\"reghex\\";
 
 var _node_expression = _pattern(1),
     _node_expression2 = _pattern(2),
@@ -140,28 +132,26 @@ var _node_expression = _pattern(1),
     _node_expression4 = _pattern(4),
     _node_expression5 = _pattern(5);
 
-const node = function _node() {
+const node = function _node(state) {
   var match,
-      last_index = _getLastIndex(),
+      last_index = state.index,
       node = _tag([], 'node');
 
   block_0: {
-    var index_0 = _getLastIndex();
+    var index_0 = state.index;
 
     loop_0: for (var iter_0 = 0; true; iter_0++) {
-      var index_0 = _getLastIndex();
+      var index_0 = state.index;
 
-      if (match = _execPattern(_node_expression)) {
+      if (match = _exec(state, _node_expression)) {
         node.push(match);
       } else {
         if (iter_0) {
-          _setLastIndex(index_0);
-
+          state.index = index_0;
           break loop_0;
         }
 
-        _setLastIndex(index_0);
-
+        state.index = index_0;
         break block_0;
       }
     }
@@ -170,53 +160,46 @@ const node = function _node() {
   }
 
   loop_0: for (var iter_0 = 0; true; iter_0++) {
-    var index_0 = _getLastIndex();
+    var index_0 = state.index;
 
-    if (match = _execPattern(_node_expression2)) {
+    if (match = _exec(state, _node_expression2)) {
       node.push(match);
     } else {
       if (iter_0) {
-        _setLastIndex(index_0);
-
+        state.index = index_0;
         break loop_0;
       }
 
-      _setLastIndex(last_index);
-
+      state.index = last_index;
       return;
     }
   }
 
   loop_0: while (true) {
-    var index_0 = _getLastIndex();
-
+    var index_0 = state.index;
     var length_0 = node.length;
 
-    if (match = _execPattern(_node_expression3)) {
+    if (match = _exec(state, _node_expression3)) {
       node.push(match);
     } else {
       node.length = length_0;
-
-      _setLastIndex(index_0);
-
+      state.index = index_0;
       break loop_0;
     }
 
-    var index_2 = _getLastIndex();
+    var index_2 = state.index;
 
-    if (match = _execPattern(_node_expression4)) {
+    if (match = _exec(state, _node_expression4)) {
       node.push(match);
     } else {
-      _setLastIndex(index_2);
+      state.index = index_2;
     }
 
-    if (match = _execPattern(_node_expression5)) {
+    if (match = _exec(state, _node_expression5)) {
       node.push(match);
     } else {
       node.length = length_0;
-
-      _setLastIndex(index_0);
-
+      state.index = index_0;
       break loop_0;
     }
   }
@@ -226,13 +209,13 @@ const node = function _node() {
 `;
 
 exports[`works with transform functions 1`] = `
-"import { _getLastIndex, _setLastIndex, _execPattern, _pattern, tag as _tag } from 'reghex';
+"import { _exec, _pattern, tag as _tag } from 'reghex';
 
 var _inner_transform = x => x;
 
-const first = function _inner() {
+const first = function _inner(state) {
   var match,
-      last_index = _getLastIndex(),
+      last_index = state.index,
       node = _tag([], 'inner');
 
   return _inner_transform(node);
@@ -240,9 +223,9 @@ const first = function _inner() {
 
 const transform = x => x;
 
-const second = function _node() {
+const second = function _node(state) {
   var match,
-      last_index = _getLastIndex(),
+      last_index = state.index,
       node = _tag([], 'node');
 
   return transform(node);
