@@ -9,9 +9,9 @@ var _node_expression = (0, _reghex._pattern)(1),
     _node_expression2 = (0, _reghex._pattern)(2);
 
 const node = function _node(state) {
+  var last_index = state.index;
   var match,
-      last_index = state.index,
-      node = (0, _reghex.tag)([], 'node');
+      node = [];
 
   if (match = (0, _reghex._exec)(state, _node_expression)) {
     node.push(match);
@@ -27,7 +27,7 @@ const node = function _node(state) {
     return;
   }
 
-  return node;
+  return (0, _reghex.tag)(node, 'node');
 };"
 `;
 
@@ -37,9 +37,9 @@ exports[`works with local recursion 1`] = `
 var _inner_expression = _pattern(/inner/);
 
 const inner = function _inner(state) {
+  var last_index = state.index;
   var match,
-      last_index = state.index,
-      node = tag([], 'inner');
+      node = [];
 
   if (match = _exec(state, _inner_expression)) {
     node.push(match);
@@ -48,13 +48,13 @@ const inner = function _inner(state) {
     return;
   }
 
-  return node;
+  return tag(node, 'inner');
 };
 
 const node = function _node(state) {
+  var last_index = state.index;
   var match,
-      last_index = state.index,
-      node = tag([], 'node');
+      node = [];
 
   if (match = inner(state)) {
     node.push(match);
@@ -63,7 +63,7 @@ const node = function _node(state) {
     return;
   }
 
-  return node;
+  return tag(node, 'node');
 };"
 `;
 
@@ -75,9 +75,9 @@ var _node_expression = _pattern(1),
     _node_expression3 = _pattern(3);
 
 const node = function _node(state) {
+  var last_index = state.index;
   var match,
-      last_index = state.index,
-      node = _tag([], 'node');
+      node = [];
 
   if (match = _exec(state, _node_expression)) {
     node.push(match);
@@ -119,7 +119,7 @@ const node = function _node(state) {
     }
   }
 
-  return node;
+  return _tag(node, 'node');
 };"
 `;
 
@@ -133,9 +133,9 @@ var _node_expression = _pattern(1),
     _node_expression5 = _pattern(5);
 
 const node = function _node(state) {
+  var last_index = state.index;
   var match,
-      last_index = state.index,
-      node = _tag([], 'node');
+      node = [];
 
   block_0: {
     var index_0 = state.index;
@@ -156,7 +156,7 @@ const node = function _node(state) {
       }
     }
 
-    return node;
+    return _tag(node, 'node');
   }
 
   loop_0: for (var iter_0 = 0; true; iter_0++) {
@@ -204,7 +204,7 @@ const node = function _node(state) {
     }
   }
 
-  return node;
+  return _tag(node, 'node');
 };"
 `;
 
@@ -214,20 +214,18 @@ exports[`works with transform functions 1`] = `
 var _inner_transform = x => x;
 
 const first = function _inner(state) {
+  var last_index = state.index;
   var match,
-      last_index = state.index,
-      node = _tag([], 'inner');
-
-  return _inner_transform(node);
+      node = [];
+  return _inner_transform(_tag(node, 'inner'));
 };
 
 const transform = x => x;
 
 const second = function _node(state) {
+  var last_index = state.index;
   var match,
-      last_index = state.index,
-      node = _tag([], 'node');
-
-  return transform(node);
+      node = [];
+  return transform(_tag(node, 'node'));
 };"
 `;

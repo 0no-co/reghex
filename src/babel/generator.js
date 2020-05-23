@@ -231,7 +231,7 @@ class QuantifierNode {
     const loopId = t.identifier(`loop_${this.depth}`);
     const iterId = t.identifier(`iter_${this.depth}`);
     const indexId = t.identifier(`index_${this.depth}`);
-    const lastIndex = t.memberExpression(ids.state, t.identifier('index'));
+    const assignIndex = new AssignIndexNode(indexId);
 
     let statements;
     if (quantifier && !quantifier.singular && quantifier.required) {
@@ -245,9 +245,7 @@ class QuantifierNode {
             t.booleanLiteral(true),
             t.updateExpression('++', iterId),
             t.blockStatement([
-              t.variableDeclaration('var', [
-                t.variableDeclarator(indexId, lastIndex),
-              ]),
+              assignIndex.statement(),
               ...this.childNode.statements(),
             ])
           )
@@ -260,21 +258,14 @@ class QuantifierNode {
           t.whileStatement(
             t.booleanLiteral(true),
             t.blockStatement([
-              t.variableDeclaration('var', [
-                t.variableDeclarator(indexId, lastIndex),
-              ]),
+              assignIndex.statement(),
               ...this.childNode.statements(),
             ])
           )
         ),
       ];
     } else if (quantifier && !quantifier.required) {
-      statements = [
-        t.variableDeclaration('var', [
-          t.variableDeclarator(indexId, lastIndex),
-        ]),
-        ...this.childNode.statements(),
-      ];
+      statements = [assignIndex.statement(), ...this.childNode.statements()];
     } else {
       statements = this.childNode.statements();
     }
@@ -382,12 +373,13 @@ class AlternationNode {
 export class RootNode {
   constructor(ast, nameNode, transformNode) {
     const indexId = t.identifier('last_index');
+    const node = t.callExpression(ids.tag, [ids.node, nameNode]);
 
     this.returnStatement = t.returnStatement(
-      transformNode ? t.callExpression(transformNode, [ids.node]) : ids.node
+      transformNode ? t.callExpression(transformNode, [node]) : node
     );
 
-    this.nameNode = nameNode;
+    this.assignIndex = new AssignIndexNode(indexId);
     this.node = new AlternationNode(ast, 0, {
       returnStatement: this.returnStatement,
       restoreIndex: new RestoreIndexNode(indexId, true),
@@ -399,17 +391,11 @@ export class RootNode {
   }
 
   statements() {
-    const indexId = t.identifier('last_index');
-    const lastIndex = t.memberExpression(ids.state, t.identifier('index'));
-
     return [
+      this.assignIndex.statement(),
       t.variableDeclaration('var', [
         t.variableDeclarator(ids.match),
-        t.variableDeclarator(indexId, lastIndex),
-        t.variableDeclarator(
-          ids.node,
-          t.callExpression(ids.tag, [t.arrayExpression(), this.nameNode])
-        ),
+        t.variableDeclarator(ids.node, t.arrayExpression()),
       ]),
       ...this.node.statements(),
       this.returnStatement,
