@@ -69,7 +69,7 @@ they should be matched by setting `regex.lastIndex = index;` and after matching
 read back their updated `regex.lastIndex`.
 
 > **Note:** Sticky Regexes aren't natively
-> [supported in all versions of Internet Explorer](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/sticky#Browser_compatibility). `reghex` works around this by imitating its behaviour, which may decrease performance on IE11.
+> [supported in any versions of Internet Explorer](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/sticky#Browser_compatibility). `reghex` works around this by imitating its behaviour, which may decrease performance on IE11.
 
 This primitive allows us to build up a parser from regexes that you pass when
 authoring a parser function, also called a "matcher" in `reghex`. When `reghex` compiles
@@ -178,7 +178,7 @@ the `name` matcher afterwards. If either of these matchers fail, it will return
 **nested abstract output**.
 
 We can also see in this example that _outside_ of the regex interpolations,
-whitespaces and newlines don't matter.
+whitespace and newlines don't matter.
 
 ```js
 import { parse } from 'reghex';
@@ -200,8 +200,8 @@ template literals, where interpolations can either be filled using regexes,
 `${/pattern/}`, or with other matchers `${name}`.
 
 The tagged template syntax supports more ways to match these interpolations,
-using a regex-like Domain Specific Language. Unlike in regexes, whitespaces
-and newlines don't matter to make it easier to format and read matchers.
+using a regex-like Domain Specific Language. Unlike in regexes, whitespace
+and newlines don't matter, which makes it easier to format and read matchers.
 
 We can create **sequences** of matchers by adding multiple expressions in
 a row. A matcher using `${/1/} ${/2/}` will attempt to match `1` and then `2`
@@ -210,14 +210,14 @@ available operators are the following:
 
 | Operator | Example            | Description                                                                                                                                                                                           |
 | -------- | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `?`      | `${/1/}?`          | An **optional** may be used to make an interpolation optional. This will mean that the interpolation may or may not match.                                                                            |
-| `*`      | `${/1/}*`          | A **star** can be used to match an arbitrary amount of interpolation or none at all. This will mean that the interpolation may repeat itself or may not be matched at all.                            |
+| `?`      | `${/1/}?`          | An **optional** may be used to make an interpolation optional. This means that the interpolation may or may not match.                                                                            |
+| `*`      | `${/1/}*`          | A **star** can be used to match an arbitrary amount of interpolation or none at all. This means that the interpolation may repeat itself or may not be matched at all.                            |
 | `+`      | `${/1/}+`          | A **plus** is used like `*` and must match one or more times. When the matcher doesn't match, that's considered a failing case, since the match isn't optional.                                       |
 | `\|`     | `${/1/} \| ${/2/}` | An **alternation** can be used to match either one thing or another, falling back when the first interpolation fails.                                                                                 |
-| `()`     | `(${/1/} ${/2/})+` | A **group** can be used apply one of the other operators to an entire group of interpolations.                                                                                                        |
-| `(?: )`  | `(?: ${/1/})`      | A **non-capturing group** is like a regular group, but whatever the interpolations inside it will match, won't appear in the parser's output.                                                         |
-| `(?= )`  | `(?= ${/1/})`      | A **positive lookahead** will check whether interpolations match, and if so will continue the matcher without changing the input. If it matches it's essentially ignored.                             |
-| `(?! )`  | `(?! ${/1/})`      | A **negative lookahead** will check whether interpolations _don't_ match, and if so will continue the matcher without changing the input. If the interpolations do match the mathcer will be aborted. |
+| `()`     | `(${/1/} ${/2/})+` | A **group** can be used to apply one of the other operators to an entire group of interpolations.                                                                                                        |
+| `(?: )`  | `(?: ${/1/})`      | A **non-capturing group** is like a regular group, but the interpolations matched inside it don't appear in the parser's output.                                                         |
+| `(?= )`  | `(?= ${/1/})`      | A **positive lookahead** checks whether interpolations match, and if so continues the matcher without changing the input. If it matches, it's essentially ignored.                             |
+| `(?! )`  | `(?! ${/1/})`      | A **negative lookahead** checks whether interpolations _don't_ match, and if so continues the matcher without changing the input. If the interpolations do match the matcher is aborted. |
 
 We can combine and compose these operators to create more complex matchers.
 For instance, we can extend the original example to only allow a specific set
@@ -262,7 +262,7 @@ parse(name)('tim!'); // [ "tim", .tag = "name" ]
 parse(name)('tim'); // undefined
 ```
 
-Lastly, like with regexex `?`, `*`, and `+` may be used as "quantifiers". The first two
+Lastly, like with regexes, `?`, `*`, and `+` may be used as "quantifiers". The first two
 may also be optional and _not_ match their patterns without the matcher failing.
 The `+` operator is used to match an interpolation _one or more_ times, while the
 `*` operators may match _zero or more_ times. Let's use this to allow the `"!"`
@@ -286,7 +286,7 @@ non-capturing groups, or other groups.
 
 In the previous sections, we've seen that the **nodes** that `reghex` outputs are arrays containing
 match strings or other nodes and have a special `tag` property with the node's type.
-We can **change this output** while we're parsing by passing a second function to our matcher definition.
+We can **change this output** while we're parsing by passing a function to our matcher definition.
 
 ```js
 const name = match('name', (x) => x[0])`
@@ -300,8 +300,8 @@ In the above example, we're passing a small function, `x => x[0]` to the matcher
 second argument. This will change the matcher's output, which causes the parser to
 now return a new output for this matcher.
 
-We can use this function creatively by outputting full AST nodes, maybe like the
-ones even that resemble Babel's output:
+We can use this function creatively by outputting full AST nodes, maybe even like the
+ones that resemble Babel's output:
 
 ```js
 const identifier = match('identifier', (x) => ({
@@ -316,7 +316,7 @@ parse(name)('var_name'); // { type: "Identifier", name: "var_name" }
 
 We've now entirely changed the output of the parser for this matcher. Given that each
 matcher can change its output, we're free to change the parser's output entirely.
-By **returning a falsy** in this matcher, we can also change the matcher to not have
+By **returning a falsy value** in this matcher, we can also change the matcher to not have
 matched, which would cause other matchers to treat it like a mismatch!
 
 ```js
