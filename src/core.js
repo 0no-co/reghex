@@ -9,6 +9,15 @@ export const _pattern = (input) => {
     : new RegExp(`^(?:${source})`, 'g');
 };
 
+export const _substr = (state, pattern) => {
+  const end = state.index + pattern.length;
+  const sub = state.input.slice(state.index, end);
+  if (sub === pattern) {
+    state.index = end;
+    return sub;
+  }
+};
+
 export const _exec = (state, pattern) => {
   if (typeof pattern === 'function') return pattern();
 

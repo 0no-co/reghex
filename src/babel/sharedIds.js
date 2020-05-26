@@ -2,6 +2,7 @@ export class SharedIds {
   constructor(t) {
     this.t = t;
     this.execId = t.identifier('_exec');
+    this.substrId = t.identifier('_substr');
     this.patternId = t.identifier('_pattern');
     this.tagId = t.identifier('tag');
   }
@@ -20,6 +21,10 @@ export class SharedIds {
 
   get exec() {
     return this.t.identifier(this.execId.name);
+  }
+
+  get substr() {
+    return this.t.identifier(this.substrId.name);
   }
 
   get pattern() {

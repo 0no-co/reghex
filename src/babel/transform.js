@@ -3,6 +3,7 @@ import { SharedIds } from './sharedIds';
 import { initGenerator, RootNode } from './generator';
 
 export function makeHelpers(t) {
+  const regexPatternsRe = /^[()\[\]|.+?*]|[^\\][()\[\]|.+?*$^]|\\[wdsWDS]/;
   const importSourceRe = /reghex$|^reghex\/macro/;
   const importName = 'reghex';
   const ids = new SharedIds(t);
@@ -33,6 +34,10 @@ export function makeHelpers(t) {
         t.importSpecifier(
           (ids.execId = path.scope.generateUidIdentifier('exec')),
           t.identifier('_exec')
+        ),
+        t.importSpecifier(
+          (ids.substrId = path.scope.generateUidIdentifier('substr')),
+          t.identifier('_substr')
         ),
         t.importSpecifier(
           (ids.patternId = path.scope.generateUidIdentifier('pattern')),
@@ -105,14 +110,14 @@ export function makeHelpers(t) {
     },
 
     /** Given a match, hoists its expressions in front of the match's statement */
-    _hoistExpressions(path) {
+    _prepareExpressions(path) {
       t.assertTaggedTemplateExpression(path.node);
 
       const variableDeclarators = [];
       const matchName = this.getMatchName(path);
 
       const hoistedExpressions = path.node.quasi.expressions.map(
-        (expression) => {
+        (expression, i) => {
           if (
             t.isIdentifier(expression) &&
             path.scope.hasBinding(expression.name)
@@ -122,17 +127,28 @@ export function makeHelpers(t) {
               const matchPath = binding.path.get('init');
               if (this.isMatch(matchPath)) return expression;
             }
+          } else if (
+            t.isRegExpLiteral(expression) &&
+            !regexPatternsRe.test(expression.pattern)
+          ) {
+            // NOTE: This is an optimisation path, where the pattern regex is inlined
+            // and has determined to be "simple" enough to be turned into a string
+            return t.stringLiteral(
+              expression.pattern.replace(/\\./g, (x) => x[1])
+            );
           }
 
           const id = path.scope.generateUidIdentifier(
             `${matchName}_expression`
           );
+
           variableDeclarators.push(
             t.variableDeclarator(
               id,
               t.callExpression(ids.pattern, [expression])
             )
           );
+
           return id;
         }
       );
@@ -143,10 +159,26 @@ export function makeHelpers(t) {
           .insertBefore(t.variableDeclaration('var', variableDeclarators));
       }
 
-      return hoistedExpressions;
+      return hoistedExpressions.map((id) => {
+        // Use _substr helper instead if the expression is a string
+        if (t.isStringLiteral(id)) {
+          return t.callExpression(ids.substr, [ids.state, id]);
+        }
+
+        // Directly call expression if it's sure to be another matcher
+        const binding = path.scope.getBinding(id.name);
+        if (binding && t.isVariableDeclarator(binding.path.node)) {
+          const matchPath = binding.path.get('init');
+          if (this.isMatch(matchPath)) {
+            return t.callExpression(id, [ids.state]);
+          }
+        }
+
+        return t.callExpression(ids.exec, [ids.state, id]);
+      });
     },
 
-    _hoistTransform(path) {
+    _prepareTransform(path) {
       const transformNode = path.node.tag.arguments[1];
       if (!transformNode) return null;
       if (t.isIdentifier(transformNode)) return transformNode;
@@ -174,22 +206,8 @@ export function makeHelpers(t) {
       const nameNode = path.node.tag.arguments[0];
       const quasis = path.node.quasi.quasis.map((x) => x.value.cooked);
 
-      // Hoist expressions and wrap them in an execPattern call
-      const expressions = this._hoistExpressions(path).map((id) => {
-        // Directly call expression if it's sure to be another matcher
-        const binding = path.scope.getBinding(id.name);
-        if (binding && t.isVariableDeclarator(binding.path.node)) {
-          const matchPath = binding.path.get('init');
-          if (this.isMatch(matchPath)) {
-            return t.callExpression(id, [ids.state]);
-          }
-        }
-
-        return t.callExpression(ids.exec, [ids.state, id]);
-      });
-
-      // Hoist transform argument if necessary
-      const transformNode = this._hoistTransform(path);
+      const expressions = this._prepareExpressions(path);
+      const transformNode = this._prepareTransform(path);
 
       let ast;
       try {
