@@ -536,6 +536,23 @@ describe('negative lookahead group', () => {
   );
 });
 
+describe('longer negative lookahead group', () => {
+  const node = match('node')`${/1/} (?! ${/2/} ${/3/}) ${/\d/} ${/\d/}`;
+  it.each`
+    input    | result             | lastIndex
+    ${'145'} | ${['1', '4', '5']} | ${3}
+    ${'124'} | ${['1', '2', '4']} | ${3}
+    ${'123'} | ${undefined}       | ${0}
+    ${'2'}   | ${undefined}       | ${0}
+    ${'_'}   | ${undefined}       | ${0}
+  `(
+    'should return $result when $input is passed',
+    ({ input, result, lastIndex }) => {
+      expectToParse(node, input, result, lastIndex);
+    }
+  );
+});
+
 describe('negative lookahead group with plus matcher', () => {
   const node = match('node')`(?! ${/1/}+) ${/\d/}`;
   it.each`

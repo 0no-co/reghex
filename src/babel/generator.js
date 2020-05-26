@@ -201,9 +201,11 @@ class QuantifierNode {
     }
 
     if (ast.type === 'group' && ast.lookahead === 'negative') {
+      childOpts.abort = new AbortNode(invertId);
+      childOpts.restoreIndex = this.restoreIndex;
+      this.restoreIndex = opts.restoreIndex;
       this.blockId = invertId;
       this.abort = opts.abort;
-      childOpts.abort = new AbortNode(invertId);
     }
 
     if (quantifier && !quantifier.singular && quantifier.required) {
@@ -270,18 +272,23 @@ class QuantifierNode {
       statements = this.childNode.statements();
     }
 
-    if (this.restoreIndex && this.assignIndex) {
-      statements.unshift(this.assignIndex.statement());
-      statements.push(this.restoreIndex.statement());
-    }
-
-    if (this.blockId) {
+    if (this.blockId && this.assignIndex && this.restoreIndex) {
       statements = [
         t.labeledStatement(
           this.blockId,
-          t.blockStatement([...statements, this.abort.statement()])
+          t.blockStatement(
+            [
+              this.assignIndex.statement(),
+              ...statements,
+              this.restoreIndex.statement(),
+              this.abort.statement(),
+            ].filter(Boolean)
+          )
         ),
-      ];
+      ].filter(Boolean);
+    } else if (this.assignIndex && this.restoreIndex) {
+      statements.unshift(this.assignIndex.statement());
+      statements.push(this.restoreIndex.statement());
     }
 
     return statements;
