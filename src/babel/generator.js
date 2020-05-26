@@ -194,10 +194,10 @@ class QuantifierNode {
     this.restoreIndex = null;
     this.blockId = null;
     this.abort = null;
+
     if (ast.type === 'group' && !!ast.lookahead) {
       this.restoreIndex = new RestoreIndexNode(indexId);
       this.assignIndex = new AssignIndexNode(indexId);
-      childOpts.restoreIndex = null;
     }
 
     if (ast.type === 'group' && ast.lookahead === 'negative') {
