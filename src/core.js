@@ -24,15 +24,20 @@ export const _exec = (state, pattern) => {
   let match;
   if (isStickySupported) {
     pattern.lastIndex = state.index;
-    match = pattern.exec(state.input);
-    state.index = pattern.lastIndex;
+    if (pattern.test(state.input)) {
+      match = state.input.slice(state.index, pattern.lastIndex);
+      state.index = pattern.lastIndex;
+    }
   } else {
     pattern.lastIndex = 0;
-    match = pattern.exec(state.input.slice(state.input));
-    state.index += pattern.lastIndex;
+    if (pattern.test(state.input.slice(state.index))) {
+      const lastIndex = state.index + pattern.lastIndex;
+      match = state.input.slice(state.index, lastIndex);
+      state.index = lastIndex;
+    }
   }
 
-  return match && match[0];
+  return match;
 };
 
 export const tag = (array, tag) => {
