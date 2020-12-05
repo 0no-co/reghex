@@ -135,14 +135,12 @@ const node = function (state) {
 exports[`works with self-referential thunks 1`] = `
 "import { match, tag, _exec, _pattern } from 'reghex';
 
-var _inner_expression = _pattern(() => node);
-
 const inner = function (state) {
   var index_1 = state.index;
   var node = [];
   var match;
 
-  if (match = _exec(state, _inner_expression)) {
+  if (match = node(state)) {
     node.push(match);
   } else {
     state.index = index_1;

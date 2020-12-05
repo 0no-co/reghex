@@ -107,6 +107,22 @@ export function makeHelpers({ types: t, template }) {
       const hoistedExpressions = path.node.quasi.expressions.map(
         (expression, i) => {
           if (
+            t.isArrowFunctionExpression(expression) &&
+            t.isIdentifier(expression.body)
+          ) {
+            expression = expression.body;
+          } else if (
+            (t.isFunctionExpression(expression) ||
+              t.isArrowFunctionExpression(expression)) &&
+            t.isBlockStatement(expression.body) &&
+            expression.body.body.length === 1 &&
+            t.isReturnStatement(expression.body.body[0]) &&
+            t.isIdentifier(expression.body.body[0].argument)
+          ) {
+            expression = expression.body.body[0].argument;
+          }
+
+          if (
             t.isIdentifier(expression) &&
             path.scope.hasBinding(expression.name)
           ) {
