@@ -46,7 +46,7 @@ export const parse = (pattern) => (input) => {
   return pattern(state);
 };
 
-export const match = (name, transform) => (quasis, ...expressions) => {
+const match = (name, transform) => (quasis, ...expressions) => {
   const ast = parseDSL(
     quasis,
     expressions.map((expression, i) => `_exec(state, _e${i})`)
@@ -60,3 +60,5 @@ export const match = (name, transform) => (quasis, ...expressions) => {
   );
   return makeMatcher(_exec, name, transform, ...expressions.map(_pattern));
 };
+
+export default match;

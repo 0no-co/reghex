@@ -65,8 +65,7 @@
     "prettier": "^2.0.5",
     "rimraf": "^3.0.2",
     "rollup": "^2.10.2",
-    "rollup-plugin-babel": "^4.4.0",
-    "rollup-plugin-terser": "^7.0.2"
+    "rollup-plugin-babel": "^4.4.0"
   },
   "prettier": {
     "singleQuote": true
