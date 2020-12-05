@@ -8,7 +8,7 @@ var _reghex = require(\\"reghex\\");
 var _node_expression = (0, _reghex._pattern)(1),
     _node_expression2 = (0, _reghex._pattern)(2);
 
-const node = function _node(state) {
+const node = function (state) {
   var index_1 = state.index;
   var node = [];
   var match;
@@ -35,7 +35,7 @@ const node = function _node(state) {
 exports[`works with local recursion 1`] = `
 "import { tag, _exec, _pattern } from 'reghex';
 
-const inner = function _inner(state) {
+const inner = function (state) {
   var index_1 = state.index;
   var node = [];
   var match;
@@ -51,7 +51,7 @@ const inner = function _inner(state) {
   return node;
 };
 
-const node = function _node(state) {
+const node = function (state) {
   var index_1 = state.index;
   var node = [];
   var match;
@@ -75,7 +75,7 @@ var _node_expression = _pattern(1),
     _node_expression2 = _pattern(2),
     _node_expression3 = _pattern(3);
 
-const node = function _node(state) {
+const node = function (state) {
   var index_1 = state.index;
   var node = [];
   var match;
@@ -134,7 +134,7 @@ var _node_expression = _pattern(1),
     _node_expression4 = _pattern(4),
     _node_expression5 = _pattern(5);
 
-const node = function _node(state) {
+const node = function (state) {
   var index_1 = state.index;
   var node = [];
   var match;
@@ -218,24 +218,21 @@ exports[`works with transform functions 1`] = `
 
 var _inner_transform = x => x;
 
-const first = function _inner(state) {
+const first = function (state) {
   var index_1 = state.index;
   var node = [];
   var match;
   node.tag = 'inner';
-  return;
-
-  _inner_transform(node);
+  return _inner_transform(node);
 };
 
 const transform = x => x;
 
-const second = function _node(state) {
+const second = function (state) {
   var index_1 = state.index;
   var node = [];
   var match;
   node.tag = 'node';
-  return;
-  transform(node);
+  return transform(node);
 };"
 `;

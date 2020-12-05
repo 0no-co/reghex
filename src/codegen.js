@@ -2,11 +2,11 @@ const _state = 'state';
 const _match = 'match';
 const _node = 'node';
 
-function js(/* arguments */) {
+export function js(/* arguments */) {
   let body = arguments[0][0];
   for (let i = 1; i < arguments.length; i++)
     body = body + arguments[i] + (arguments[0][i] || '');
-  return '\n' + body.trim();
+  return body.trim();
 }
 
 const assignIndex = (depth) =>
@@ -216,8 +216,8 @@ const astAlternation = (ast, depth, opts) => {
   `;
 };
 
-const astRoot = (ast, id, name, transform) => js`
-  function ${id}(${_state}) {
+const astRoot = (ast, name, transform) => js`
+  (function (${_state}) {
     ${assignIndex(1)}
     var ${_node} = [];
     var ${_match};
@@ -232,7 +232,7 @@ const astRoot = (ast, id, name, transform) => js`
 
     ${_node}.tag = ${name};
     return ${transform ? js`(${transform})(${_node})` : _node};
-  }
+  })
 `;
 
 export { astRoot };

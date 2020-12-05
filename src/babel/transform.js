@@ -194,7 +194,6 @@ export function makeHelpers({ types: t, template }) {
           );
       }
 
-      const matchName = this.getMatchName(path);
       const name = path.node.tag.arguments[0];
       const quasis = path.node.quasi.quasis.map((x) => x.value.cooked);
 
@@ -209,8 +208,7 @@ export function makeHelpers({ types: t, template }) {
         throw path.get('quasi').buildCodeFrameError(error.message);
       }
 
-      const id = path.scope.generateUidIdentifier(matchName).name;
-      const code = astRoot(ast, id, '%%name%%', transform && '%%transform%%');
+      const code = astRoot(ast, '%%name%%', transform && '%%transform%%');
 
       path.replaceWith(
         template.expression(code)(transform ? { name, transform } : { name })
