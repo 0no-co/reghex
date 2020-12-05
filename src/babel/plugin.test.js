@@ -54,15 +54,15 @@ it('works with local recursion', () => {
   ).toMatchSnapshot();
 });
 
-it('works with self-referential thuns', () => {
+it('works with self-referential thunks', () => {
   const code = `
     import { match, tag } from 'reghex';
 
-    const inner = m('inner')\`
+    const inner = match('inner')\`
       \${() => node}
     \`;
 
-    const node = m('node')\`
+    const node = match('node')\`
       \${inner}
     \`;
   `;

@@ -130,14 +130,42 @@ const node = function (state) {
 };"
 `;
 
-exports[`works with self-referential thuns 1`] = `
+exports[`works with self-referential thunks 1`] = `
 "import { match, tag, _exec, _pattern } from 'reghex';
-const inner = m('inner')\`
-      \${() => node}
-    \`;
-const node = m('node')\`
-      \${inner}
-    \`;"
+
+var _inner_expression = _pattern(() => node);
+
+const inner = function (state) {
+  var index_1 = state.index;
+  var node = [];
+  var match;
+
+  if (match = _exec(state, _inner_expression)) {
+    node.push(match);
+  } else {
+    state.index = index_1;
+    return;
+  }
+
+  node.tag = 'inner';
+  return node;
+};
+
+const node = function (state) {
+  var index_1 = state.index;
+  var node = [];
+  var match;
+
+  if (match = inner(state)) {
+    node.push(match);
+  } else {
+    state.index = index_1;
+    return;
+  }
+
+  node.tag = 'node';
+  return node;
+};"
 `;
 
 exports[`works with standard features 1`] = `
