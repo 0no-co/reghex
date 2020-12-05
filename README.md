@@ -164,7 +164,7 @@ To introduce nesting to `reghex` matchers, we can refer to one matcher in anothe
 Let's extend our original example;
 
 ```js
-import match from 'reghex';
+import { match } from 'reghex';
 
 const name = match('name')`
   ${/\w+/}
@@ -203,7 +203,7 @@ start referencing each other forming a loop. To fix this we can create a
 function that returns our root matcher:
 
 ```js
-import match from 'reghex';
+import { match } from 'reghex';
 
 const value = match('value')`
   (${/\w+/} | ${() => root})+
@@ -341,7 +341,7 @@ By **returning a falsy value** in this matcher, we can also change the matcher t
 matched, which would cause other matchers to treat it like a mismatch!
 
 ```js
-import match, { parse } from 'reghex';
+import { match, parse } from 'reghex';
 
 const name = match('name')((x) => {
   return x[0] !== 'tim' ? x : undefined;
