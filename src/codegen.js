@@ -95,9 +95,7 @@ const astGroup = (ast, depth, opts) => {
 };
 
 const astChild = (ast, depth, opts) =>
-  ast.type === 'expression'
-    ? astExpression(ast, depth, opts)
-    : astGroup(ast, depth, opts);
+  ast.expression ? astExpression(ast, depth, opts) : astGroup(ast, depth, opts);
 
 const astRepeating = (ast, depth, opts) => {
   const label = `loop_${depth}`;

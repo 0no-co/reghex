@@ -4,9 +4,7 @@ export const parse = (quasis, expressions) => {
 
   const sequenceStack = [];
   const rootSequence = {
-    type: 'sequence',
     sequence: [],
-    alternation: null,
   };
 
   let currentGroup = null;
@@ -15,12 +13,8 @@ export const parse = (quasis, expressions) => {
 
   while (stackIndex < quasis.length + expressions.length) {
     if (stackIndex % 2 !== 0) {
-      const expression = expressions[stackIndex++ >> 1];
-
       currentSequence.sequence.push({
-        type: 'expression',
-        expression,
-        quantifier: null,
+        expression: expressions[stackIndex++ >> 1],
       });
     }
 
@@ -32,9 +26,7 @@ export const parse = (quasis, expressions) => {
         continue;
       } else if (char === '|' && currentSequence.sequence.length > 0) {
         currentSequence = currentSequence.alternation = {
-          type: 'sequence',
           sequence: [],
-          alternation: null,
         };
 
         continue;
@@ -44,14 +36,9 @@ export const parse = (quasis, expressions) => {
         if (currentSequence) continue;
       } else if (char === '(') {
         currentGroup = {
-          type: 'group',
           sequence: {
-            type: 'sequence',
             sequence: [],
-            alternation: null,
           },
-          capture: null,
-          quantifier: null,
         };
 
         sequenceStack.push(currentSequence);
