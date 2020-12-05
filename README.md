@@ -43,7 +43,15 @@ In your `.babelrc`, `babel.config.js`, or `package.json:babel` add:
 Alternatively, you can set up [`babel-plugin-macros`](https://github.com/kentcdodds/babel-plugin-macros) and
 import `reghex` from `"reghex/macro"` instead.
 
-This step is **optional**. `reghex` can also generate its optimised JS code during runtime only!
+This step is **optional**. `reghex` can also generate its optimised JS code during runtime.
+This will only incur a tiny parsing cost on initialisation, but due to the JIT of modern
+JS engines there won't be any difference in performance between pre-compiled and compiled
+versions otherwise.
+
+Since the `reghex` runtime is rather small, for larger grammars it may even make sense not
+to precompile the matchers at all. For this case you may pass the `{ "codegen": false }`
+option to the Babel plugin, which will minify the `reghex` matcher templates without
+precompiling them.
 
 ##### 3. Have fun writing parsers!
 
