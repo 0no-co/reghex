@@ -65,9 +65,6 @@ const astExpression = (ast, depth, opts) => {
 };
 
 const astGroup = (ast, depth, opts) => {
-  if (ast.sequence.length === 1)
-    return astExpression(ast.sequence[0], depth, opts);
-
   const capture = !!opts.capture && !ast.capture;
 
   let group = '';
@@ -208,8 +205,8 @@ const astSequence = (ast, depth, opts) => {
     }
 
     let sequence = '';
-    for (let i = 0; i < ast.sequence.length; i++)
-      sequence += astQuantifier(ast.sequence[i], depth, childOpts);
+    for (let i = 0; i < ast.length; i++)
+      sequence += astQuantifier(ast[i], depth, childOpts);
 
     if (!ast.alternation) {
       body += sequence;

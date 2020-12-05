@@ -3,9 +3,7 @@ export const parse = (quasis, expressions) => {
   let stackIndex = 0;
 
   const sequenceStack = [];
-  const rootSequence = {
-    sequence: [],
-  };
+  const rootSequence = [];
 
   let currentGroup = null;
   let lastMatch;
@@ -13,7 +11,7 @@ export const parse = (quasis, expressions) => {
 
   while (stackIndex < quasis.length + expressions.length) {
     if (stackIndex % 2 !== 0) {
-      currentSequence.sequence.push({
+      currentSequence.push({
         expression: expressions[stackIndex++ >> 1],
       });
     }
@@ -24,32 +22,23 @@ export const parse = (quasis, expressions) => {
 
       if (char === ' ' || char === '\t' || char === '\r' || char === '\n') {
         continue;
-      } else if (char === '|' && currentSequence.sequence.length > 0) {
-        currentSequence = currentSequence.alternation = {
-          sequence: [],
-        };
-
+      } else if (char === '|' && currentSequence.length) {
+        currentSequence = currentSequence.alternation = [];
         continue;
-      } else if (char === ')' && currentSequence.sequence.length > 0) {
+      } else if (char === ')' && currentSequence.length) {
         currentGroup = null;
         currentSequence = sequenceStack.pop();
         if (currentSequence) continue;
       } else if (char === '(') {
         currentGroup = {
-          sequence: {
-            sequence: [],
-          },
+          sequence: [],
         };
 
         sequenceStack.push(currentSequence);
-        currentSequence.sequence.push(currentGroup);
+        currentSequence.push(currentGroup);
         currentSequence = currentGroup.sequence;
         continue;
-      } else if (
-        char === '?' &&
-        currentSequence.sequence.length === 0 &&
-        currentGroup
-      ) {
+      } else if (char === '?' && !currentSequence.length && currentGroup) {
         const nextChar = quasi[quasiIndex++];
         if (nextChar === ':') {
           currentGroup.capture = nextChar;
@@ -63,8 +52,7 @@ export const parse = (quasis, expressions) => {
         }
       } else if (
         (char === '?' || char === '+' || char === '*') &&
-        (lastMatch =
-          currentSequence.sequence[currentSequence.sequence.length - 1])
+        (lastMatch = currentSequence[currentSequence.length - 1])
       ) {
         lastMatch.quantifier = char;
         continue;
