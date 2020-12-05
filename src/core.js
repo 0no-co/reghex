@@ -15,7 +15,8 @@ export const _exec = (state, pattern) => {
   let match;
 
   if (typeof pattern === 'function') {
-    return pattern(state);
+    while (typeof pattern === 'function') pattern = pattern(state);
+    return pattern;
   } else if (typeof pattern === 'string') {
     const end = state.index + pattern.length;
     const sub = state.input.slice(state.index, end);
@@ -49,14 +50,13 @@ export const parse = (pattern) => (input) => {
 export const match = (name, transform) => (quasis, ...expressions) => {
   const ast = parseDSL(
     quasis,
-    expressions.map((expression, i) => `_exec(state, _e${i})`)
+    expressions.map((expression, i) => `_e(state, _${i})`)
   );
+
   const makeMatcher = new Function(
-    '_exec',
-    '_name',
-    '_transform',
-    ...expressions.map((_expression, i) => `_e${i}`),
-    'return ' + astRoot(ast, '_name', transform ? '_transform' : null)
+    '_e,_n,_t,' + expressions.map((_expression, i) => `_${i}`).join(','),
+    'return ' + astRoot(ast, '_n', transform ? '_t' : null)
   );
+
   return makeMatcher(_exec, name, transform, ...expressions.map(_pattern));
 };
