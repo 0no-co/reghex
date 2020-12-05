@@ -17,14 +17,6 @@ export function makeHelpers({ types: t, template }) {
       if (!importSourceRe.test(path.node.source.value)) return;
       _hasUpdatedImport = true;
 
-      const defaultSpecifierIndex = path.node.specifiers.findIndex((node) => {
-        return t.isImportDefaultSpecifier(node);
-      });
-
-      if (defaultSpecifierIndex > -1) {
-        path.node.specifiers.splice(defaultSpecifierIndex, 1);
-      }
-
       if (path.node.source.value !== importName) {
         path.node.source = t.stringLiteral(importName);
       }
@@ -43,6 +35,7 @@ export function makeHelpers({ types: t, template }) {
       const tagImport = path.node.specifiers.find((node) => {
         return t.isImportSpecifier(node) && node.imported.name === 'tag';
       });
+
       if (!tagImport) {
         path.node.specifiers.push(
           t.importSpecifier(
@@ -82,7 +75,7 @@ export function makeHelpers({ types: t, template }) {
         binding.kind !== 'module' ||
         !t.isImportDeclaration(binding.path.parent) ||
         !importSourceRe.test(binding.path.parent.source.value) ||
-        !t.isImportDefaultSpecifier(binding.path.node)
+        !t.isImportSpecifier(binding.path.node)
       ) {
         return null;
       }

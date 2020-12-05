@@ -33,12 +33,12 @@ const node = function (state) {
 `;
 
 exports[`works while only minifying 1`] = `
-"import match from 'reghex/macro';
+"import { match } from 'reghex/macro';
 const node = match('node')([\\"\\", \\"+|\\", \\"+(\\", \\"(\\", \\"?\\", \\"))*\\"], 1, 2, 3, 4, 5);"
 `;
 
 exports[`works with local recursion 1`] = `
-"import { tag, _exec, _pattern } from 'reghex';
+"import { match as m, tag, _exec, _pattern } from 'reghex';
 
 const inner = function (state) {
   var index_1 = state.index;
@@ -74,7 +74,7 @@ const node = function (state) {
 `;
 
 exports[`works with non-capturing groups 1`] = `
-"import { _exec, _pattern, tag as _tag } from 'reghex';
+"import { match, _exec, _pattern, tag as _tag } from 'reghex';
 
 var _node_expression = _pattern(1),
     _node_expression2 = _pattern(2),
@@ -131,7 +131,7 @@ const node = function (state) {
 `;
 
 exports[`works with standard features 1`] = `
-"import { _exec, _pattern, tag as _tag } from \\"reghex\\";
+"import { match, _exec, _pattern, tag as _tag } from \\"reghex\\";
 
 var _node_expression = _pattern(1),
     _node_expression2 = _pattern(2),
@@ -219,7 +219,7 @@ const node = function (state) {
 `;
 
 exports[`works with transform functions 1`] = `
-"import { _exec, _pattern, tag as _tag } from 'reghex';
+"import { match, _exec, _pattern, tag as _tag } from 'reghex';
 
 var _inner_transform = x => x;
 
