@@ -18,23 +18,24 @@ const restoreIndex = (depth) =>
 const abortOnCondition = (condition, hooks) => js`
   if (${condition}) {
     ${restoreIndex(opts.index)}
-    ${opts.abort}
+    ${opts.abort || ''}
   } else {
-    ${opts.onAbort}
+    ${opts.onAbort || ''}
   }
 `;
 
 const astExpression = (ast, depth, opts) => {
+  const restoreLength =
+    opts.length &&
+    opts.abort &&
+    js`
+    ${_node}.length = length_${opts.length};
+  `;
+
   const abort = js`
-    ${opts.onAbort}
+    ${opts.onAbort || ''}
     ${restoreIndex(opts.index)}
-    ${
-      opts.length && opts.abort
-        ? js`
-      ${_node}.length = length_${opts.length};
-    `
-        : ''
-    }
+    ${restoreLength || ''}
     ${opts.abort || ''}
   `;
 
@@ -97,7 +98,7 @@ const astRepeating = (ast, depth, opts) => {
             ${restoreIndex(depth)}
             break ${label};
           } else {
-            ${opts.onAbort}
+            ${opts.onAbort || ''}
           }
         `,
       })}
