@@ -1,13 +1,13 @@
 import { makeHelpers } from './transform';
 
-export default function reghexPlugin({ types }) {
+export default function reghexPlugin(babel) {
   let helpers;
 
   return {
     name: 'reghex',
     visitor: {
       Program() {
-        helpers = makeHelpers(types);
+        helpers = makeHelpers(babel);
       },
       ImportDeclaration(path) {
         helpers.updateImport(path);

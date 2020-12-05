@@ -9,120 +9,124 @@ var _node_expression = (0, _reghex._pattern)(1),
     _node_expression2 = (0, _reghex._pattern)(2);
 
 const node = function _node(state) {
-  var last_index = state.index;
-  var match,
-      node = [];
+  var index_1 = state.index;
+  var node = [];
+  var match;
 
   if (match = (0, _reghex._exec)(state, _node_expression)) {
     node.push(match);
   } else {
-    state.index = last_index;
+    state.index = index_1;
     return;
   }
 
   if (match = (0, _reghex._exec)(state, _node_expression2)) {
     node.push(match);
   } else {
-    state.index = last_index;
+    state.index = index_1;
     return;
   }
 
-  return (0, _reghex.tag)(node, 'node');
+  node.tag = 'node';
+  return node;
 };"
 `;
 
 exports[`works with local recursion 1`] = `
-"import { tag, _exec, _substr, _pattern } from 'reghex';
+"import { tag, _exec, _pattern } from 'reghex';
 
 const inner = function _inner(state) {
-  var last_index = state.index;
-  var match,
-      node = [];
+  var index_1 = state.index;
+  var node = [];
+  var match;
 
-  if (match = _substr(state, \\"inner\\")) {
+  if (match = _exec(state, \\"inner\\")) {
     node.push(match);
   } else {
-    state.index = last_index;
+    state.index = index_1;
     return;
   }
 
-  return tag(node, 'inner');
+  node.tag = 'inner';
+  return node;
 };
 
 const node = function _node(state) {
-  var last_index = state.index;
-  var match,
-      node = [];
+  var index_1 = state.index;
+  var node = [];
+  var match;
 
   if (match = inner(state)) {
     node.push(match);
   } else {
-    state.index = last_index;
+    state.index = index_1;
     return;
   }
 
-  return tag(node, 'node');
+  node.tag = 'node';
+  return node;
 };"
 `;
 
 exports[`works with non-capturing groups 1`] = `
-"import { _exec, _substr, _pattern, tag as _tag } from 'reghex';
+"import { _exec, _pattern, tag as _tag } from 'reghex';
 
 var _node_expression = _pattern(1),
     _node_expression2 = _pattern(2),
     _node_expression3 = _pattern(3);
 
 const node = function _node(state) {
-  var last_index = state.index;
-  var match,
-      node = [];
+  var index_1 = state.index;
+  var node = [];
+  var match;
 
   if (match = _exec(state, _node_expression)) {
     node.push(match);
   } else {
-    state.index = last_index;
+    state.index = index_1;
     return;
   }
 
-  var length_0 = node.length;
+  var length_2 = node.length;
 
-  alternation_1: {
-    block_1: {
-      var index_1 = state.index;
+  alternation_3: {
+    block_3: {
+      var index_3 = state.index;
 
       if (match = _exec(state, _node_expression2)) {
         node.push(match);
       } else {
-        node.length = length_0;
-        state.index = index_1;
-        break block_1;
+        state.index = index_3;
+        node.length = length_2;
+        break block_3;
       }
 
-      break alternation_1;
+      break alternation_3;
     }
 
-    loop_1: for (var iter_1 = 0; true; iter_1++) {
-      var index_1 = state.index;
+    loop_3: for (var count_3 = 0; true; count_3++) {
+      var index_3 = state.index;
 
       if (!_exec(state, _node_expression3)) {
-        if (iter_1) {
-          state.index = index_1;
-          break loop_1;
-        }
+        if (count_3) {
+          state.index = index_3;
+          break loop_3;
+        } else {}
 
-        node.length = length_0;
-        state.index = last_index;
+        state.index = index_1;
+        node.length = length_2;
         return;
       }
     }
   }
 
-  return _tag(node, 'node');
+  node.tag = 'node';
+  return node;
 };"
 `;
 
 exports[`works with standard features 1`] = `
-"import { _exec, _substr, _pattern, tag as _tag } from \\"reghex\\";
+"import { _exec, _pattern, tag as _tag } from \\"reghex\\";
 
 var _node_expression = _pattern(1),
     _node_expression2 = _pattern(2),
@@ -131,99 +135,107 @@ var _node_expression = _pattern(1),
     _node_expression5 = _pattern(5);
 
 const node = function _node(state) {
-  var last_index = state.index;
-  var match,
-      node = [];
+  var index_1 = state.index;
+  var node = [];
+  var match;
 
-  block_0: {
-    var index_0 = state.index;
+  alternation_2: {
+    block_2: {
+      var index_2 = state.index;
 
-    loop_0: for (var iter_0 = 0; true; iter_0++) {
-      var index_0 = state.index;
+      loop_2: for (var count_2 = 0; true; count_2++) {
+        var index_2 = state.index;
 
-      if (match = _exec(state, _node_expression)) {
+        if (match = _exec(state, _node_expression)) {
+          node.push(match);
+        } else {
+          if (count_2) {
+            state.index = index_2;
+            break loop_2;
+          } else {}
+
+          state.index = index_2;
+          break block_2;
+        }
+      }
+
+      break alternation_2;
+    }
+
+    loop_2: for (var count_2 = 0; true; count_2++) {
+      var index_2 = state.index;
+
+      if (match = _exec(state, _node_expression2)) {
         node.push(match);
       } else {
-        if (iter_0) {
-          state.index = index_0;
-          break loop_0;
-        }
+        if (count_2) {
+          state.index = index_2;
+          break loop_2;
+        } else {}
 
-        state.index = index_0;
-        break block_0;
+        state.index = index_1;
+        return;
       }
     }
 
-    return _tag(node, 'node');
-  }
+    loop_2: while (true) {
+      var index_2 = state.index;
+      var length_2 = node.length;
 
-  loop_0: for (var iter_0 = 0; true; iter_0++) {
-    var index_0 = state.index;
-
-    if (match = _exec(state, _node_expression2)) {
-      node.push(match);
-    } else {
-      if (iter_0) {
-        state.index = index_0;
-        break loop_0;
+      if (match = _exec(state, _node_expression3)) {
+        node.push(match);
+      } else {
+        state.index = index_2;
+        node.length = length_2;
+        break loop_2;
       }
 
-      state.index = last_index;
-      return;
+      var index_4 = state.index;
+
+      if (match = _exec(state, _node_expression4)) {
+        node.push(match);
+      } else {
+        state.index = index_4;
+      }
+
+      if (match = _exec(state, _node_expression5)) {
+        node.push(match);
+      } else {
+        state.index = index_2;
+        node.length = length_2;
+        break loop_2;
+      }
     }
   }
 
-  loop_0: while (true) {
-    var index_0 = state.index;
-    var length_0 = node.length;
-
-    if (match = _exec(state, _node_expression3)) {
-      node.push(match);
-    } else {
-      node.length = length_0;
-      state.index = index_0;
-      break loop_0;
-    }
-
-    var index_2 = state.index;
-
-    if (match = _exec(state, _node_expression4)) {
-      node.push(match);
-    } else {
-      state.index = index_2;
-    }
-
-    if (match = _exec(state, _node_expression5)) {
-      node.push(match);
-    } else {
-      node.length = length_0;
-      state.index = index_0;
-      break loop_0;
-    }
-  }
-
-  return _tag(node, 'node');
+  node.tag = 'node';
+  return node;
 };"
 `;
 
 exports[`works with transform functions 1`] = `
-"import { _exec, _substr, _pattern, tag as _tag } from 'reghex';
+"import { _exec, _pattern, tag as _tag } from 'reghex';
 
 var _inner_transform = x => x;
 
 const first = function _inner(state) {
-  var last_index = state.index;
-  var match,
-      node = [];
-  return _inner_transform(_tag(node, 'inner'));
+  var index_1 = state.index;
+  var node = [];
+  var match;
+  node.tag = 'inner';
+  return;
+
+  _inner_transform(node);
 };
 
 const transform = x => x;
 
 const second = function _node(state) {
-  var last_index = state.index;
-  var match,
-      node = [];
-  return transform(_tag(node, 'node'));
+  var index_1 = state.index;
+  var node = [];
+  var match;
+  node.tag = 'node';
+  return;
+  transform(node);
 };"
 `;

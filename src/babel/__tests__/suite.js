@@ -1,18 +1,17 @@
-import * as reghex from '../../..';
+import * as reghex from '../../../src/core';
 import * as types from '@babel/types';
+import template from '@babel/template';
 import { transform } from '@babel/core';
 import { makeHelpers } from '../transform';
 
 const match = (name) => (quasis, ...expressions) => {
-  const helpers = makeHelpers(types);
+  const helpers = makeHelpers({ types, template });
 
   let str = '';
   for (let i = 0; i < quasis.length; i++) {
     str += quasis[i];
     if (i < expressions.length) str += '${' + expressions[i].toString() + '}';
   }
-
-  const template = `(function () { return match('${name}')\`${str}\`; })()`;
 
   const testPlugin = () => ({
     visitor: {
@@ -22,11 +21,14 @@ const match = (name) => (quasis, ...expressions) => {
     },
   });
 
-  const { code } = transform(template, {
-    babelrc: false,
-    presets: [],
-    plugins: [testPlugin],
-  });
+  const { code } = transform(
+    `(function () { return match('${name}')\`${str}\`; })()`,
+    {
+      babelrc: false,
+      presets: [],
+      plugins: [testPlugin],
+    }
+  );
 
   const argKeys = Object.keys(reghex).filter((x) => {
     return x.startsWith('_') || x === 'tag';
