@@ -50,7 +50,7 @@ export const parse = (quasis, expressions) => {
             sequence: [],
             alternation: null,
           },
-          capturing: true,
+          capture: null,
           lookahead: null,
           quantifier: null,
         };
@@ -70,15 +70,13 @@ export const parse = (quasis, expressions) => {
         }
 
         if (nextChar === ':') {
-          currentGroup.capturing = false;
+          currentGroup.capture = nextChar;
           continue;
         } else if (nextChar === '=') {
-          currentGroup.capturing = false;
-          currentGroup.lookahead = 'positive';
+          currentGroup.capture = nextChar;
           continue;
         } else if (nextChar === '!') {
-          currentGroup.capturing = false;
-          currentGroup.lookahead = 'negative';
+          currentGroup.capture = nextChar;
           continue;
         }
       } else if (

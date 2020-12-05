@@ -67,8 +67,7 @@ it('supports non-capturing groups', () => {
   const ast = parseTag`(?: ${1})`;
   expect(ast).toHaveProperty('sequence.length', 1);
   expect(ast).toHaveProperty('sequence.0.type', 'group');
-  expect(ast).toHaveProperty('sequence.0.capturing', false);
-  expect(ast).toHaveProperty('sequence.0.lookahead', null);
+  expect(ast).toHaveProperty('sequence.0.capture', ':');
   expect(ast).toHaveProperty('sequence.0.sequence.sequence.length', 1);
 });
 
@@ -76,8 +75,7 @@ it('supports positive lookahead groups', () => {
   const ast = parseTag`(?= ${1})`;
   expect(ast).toHaveProperty('sequence.length', 1);
   expect(ast).toHaveProperty('sequence.0.type', 'group');
-  expect(ast).toHaveProperty('sequence.0.capturing', false);
-  expect(ast).toHaveProperty('sequence.0.lookahead', 'positive');
+  expect(ast).toHaveProperty('sequence.0.capture', '=');
   expect(ast).toHaveProperty('sequence.0.sequence.sequence.length', 1);
 });
 
@@ -85,8 +83,7 @@ it('supports negative lookahead groups', () => {
   const ast = parseTag`(?! ${1})`;
   expect(ast).toHaveProperty('sequence.length', 1);
   expect(ast).toHaveProperty('sequence.0.type', 'group');
-  expect(ast).toHaveProperty('sequence.0.capturing', false);
-  expect(ast).toHaveProperty('sequence.0.lookahead', 'negative');
+  expect(ast).toHaveProperty('sequence.0.capture', '!');
   expect(ast).toHaveProperty('sequence.0.sequence.sequence.length', 1);
 });
 
@@ -96,7 +93,7 @@ it('supports groups with alternates', () => {
       "alternation": null,
       "sequence": Array [
         Object {
-          "capturing": true,
+          "capture": null,
           "lookahead": null,
           "quantifier": null,
           "sequence": Object {

@@ -14,7 +14,7 @@ const newOpts = (prev, next) => ({
   length: next.length != null ? next.length : prev.length,
   onAbort: next.onAbort != null ? next.onAbort : prev.onAbort,
   abort: next.abort != null ? next.abort : prev.abort,
-  capturing: next.capturing != null ? next.capturing : prev.capturing,
+  capture: next.capture != null ? next.capture : prev.capture,
 });
 
 const assignIndex = (depth) =>
@@ -47,7 +47,7 @@ const astExpression = (ast, depth, opts) => {
     ${opts.abort || ''}
   `;
 
-  if (!opts.capturing) {
+  if (!opts.capture) {
     return js`
       if (!(${ast.expression})) {
         ${abort}
@@ -68,10 +68,10 @@ const astGroup = (ast, depth, opts) => {
   if (ast.sequence.length === 1)
     return astExpression(ast.sequence[0], depth, opts);
 
-  const capturing = !!opts.capturing && !!ast.capturing;
+  const capture = !!opts.capture && !ast.capture;
 
   let group = '';
-  if (!opts.length && capturing) {
+  if (!opts.length && capture) {
     return js`
       ${js`var length_${depth} = ${_node}.length;`}
       ${astSequence(
@@ -79,7 +79,7 @@ const astGroup = (ast, depth, opts) => {
         depth + 1,
         newOpts(opts, {
           length: depth,
-          capturing,
+          capture,
         })
       )}
     `;
@@ -89,7 +89,7 @@ const astGroup = (ast, depth, opts) => {
     ast.sequence,
     depth + 1,
     newOpts(opts, {
-      capturing,
+      capture,
     })
   );
 };
@@ -159,7 +159,7 @@ const astQuantifier = (ast, depth, opts) => {
   const { index, abort } = opts;
   const label = `invert_${depth}`;
 
-  if (ast.lookahead === 'negative') {
+  if (ast.capture === '!') {
     opts = newOpts(opts, {
       index: depth,
       abort: js`break ${label};`,
@@ -174,7 +174,7 @@ const astQuantifier = (ast, depth, opts) => {
   else if (ast.quantifier === 'optional') child = astOptional(ast, depth, opts);
   else child = astChild(ast, depth, opts);
 
-  if (ast.lookahead === 'negative') {
+  if (ast.capture === '!') {
     return js`
       ${label}: {
         ${assignIndex(depth)}
@@ -183,7 +183,7 @@ const astQuantifier = (ast, depth, opts) => {
         ${abort}
       }
     `;
-  } else if (ast.lookahead) {
+  } else if (ast.capture === '=') {
     return js`
       ${assignIndex(depth)}
       ${child}
@@ -247,7 +247,7 @@ const astRoot = (ast, name, transform) => js`
       length: 0,
       onAbort: '',
       abort: js`return;`,
-      capturing: true,
+      capture: true,
     })}
 
     ${_node}.tag = ${name};
