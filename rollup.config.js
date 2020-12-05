@@ -22,7 +22,6 @@ const plugins = [
       unicodeRegExp: false,
       dangerousForOf: true,
       templateString: false,
-      spreadRest: false,
     },
     exclude: 'node_modules/**',
   }),
