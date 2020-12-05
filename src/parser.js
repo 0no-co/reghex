@@ -51,7 +51,6 @@ export const parse = (quasis, expressions) => {
             alternation: null,
           },
           capture: null,
-          lookahead: null,
           quantifier: null,
         };
 
@@ -84,9 +83,7 @@ export const parse = (quasis, expressions) => {
         (lastMatch =
           currentSequence.sequence[currentSequence.sequence.length - 1])
       ) {
-        lastMatch.quantifier = 'optional';
-        if (char === '+') lastMatch.quantifier = 'repeating';
-        if (char === '*') lastMatch.quantifier = 'multiple';
+        lastMatch.quantifier = char;
         continue;
       }
 

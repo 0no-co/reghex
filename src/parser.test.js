@@ -21,15 +21,15 @@ it('supports parsing expressions with quantifiers', () => {
 
   ast = parseTag`${1}?`;
   expect(ast).toHaveProperty('sequence.0.type', 'expression');
-  expect(ast).toHaveProperty('sequence.0.quantifier', 'optional');
+  expect(ast).toHaveProperty('sequence.0.quantifier', '?');
 
   ast = parseTag`${1}+`;
   expect(ast).toHaveProperty('sequence.0.type', 'expression');
-  expect(ast).toHaveProperty('sequence.0.quantifier', 'repeating');
+  expect(ast).toHaveProperty('sequence.0.quantifier', '+');
 
   ast = parseTag`${1}*`;
   expect(ast).toHaveProperty('sequence.0.type', 'expression');
-  expect(ast).toHaveProperty('sequence.0.quantifier', 'multiple');
+  expect(ast).toHaveProperty('sequence.0.quantifier', '*');
 });
 
 it('supports top-level alternations', () => {
@@ -43,7 +43,7 @@ it('supports top-level alternations', () => {
   expect(ast).toHaveProperty('alternation.sequence.0.expression', 2);
 
   ast = parseTag`${1}? | ${2}?`;
-  expect(ast).toHaveProperty('sequence.0.quantifier', 'optional');
+  expect(ast).toHaveProperty('sequence.0.quantifier', '?');
 });
 
 it('supports groups with quantifiers', () => {
@@ -59,7 +59,7 @@ it('supports groups with quantifiers', () => {
   ast = parseTag`(${1} ${2}?)?`;
   expect(ast).toHaveProperty('sequence.length', 1);
   expect(ast).toHaveProperty('sequence.0.type', 'group');
-  expect(ast).toHaveProperty('sequence.0.quantifier', 'optional');
+  expect(ast).toHaveProperty('sequence.0.quantifier', '?');
   expect(ast).toHaveProperty('sequence.0.sequence.sequence.0.quantifier', null);
 });
 
@@ -94,7 +94,6 @@ it('supports groups with alternates', () => {
       "sequence": Array [
         Object {
           "capture": null,
-          "lookahead": null,
           "quantifier": null,
           "sequence": Object {
             "alternation": Object {

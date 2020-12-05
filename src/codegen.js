@@ -167,11 +167,10 @@ const astQuantifier = (ast, depth, opts) => {
   }
 
   let child;
-  if (ast.quantifier === 'repeating') {
+  if (ast.quantifier === '+') {
     child = astRepeating(ast, depth, opts);
-  } else if (ast.quantifier === 'multiple')
-    child = astMultiple(ast, depth, opts);
-  else if (ast.quantifier === 'optional') child = astOptional(ast, depth, opts);
+  } else if (ast.quantifier === '*') child = astMultiple(ast, depth, opts);
+  else if (ast.quantifier === '?') child = astOptional(ast, depth, opts);
   else child = astChild(ast, depth, opts);
 
   if (ast.capture === '!') {
