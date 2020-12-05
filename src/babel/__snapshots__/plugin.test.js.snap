@@ -130,6 +130,16 @@ const node = function (state) {
 };"
 `;
 
+exports[`works with self-referential thuns 1`] = `
+"import { match, tag, _exec, _pattern } from 'reghex';
+const inner = m('inner')\`
+      \${() => node}
+    \`;
+const node = m('node')\`
+      \${inner}
+    \`;"
+`;
+
 exports[`works with standard features 1`] = `
 "import { match, _exec, _pattern, tag as _tag } from \\"reghex\\";
 

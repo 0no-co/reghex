@@ -54,6 +54,25 @@ it('works with local recursion', () => {
   ).toMatchSnapshot();
 });
 
+it('works with self-referential thuns', () => {
+  const code = `
+    import { match, tag } from 'reghex';
+
+    const inner = m('inner')\`
+      \${() => node}
+    \`;
+
+    const node = m('node')\`
+      \${inner}
+    \`;
+  `;
+
+  expect(
+    transform(code, { babelrc: false, presets: [], plugins: [reghexPlugin] })
+      .code
+  ).toMatchSnapshot();
+});
+
 it('works with transform functions', () => {
   const code = `
     import { match } from 'reghex';
