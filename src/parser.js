@@ -64,10 +64,6 @@ export const parse = (quasis, expressions) => {
         currentGroup
       ) {
         const nextChar = quasi[quasiIndex++];
-        if (!nextChar) {
-          throw new SyntaxError('Unexpected end of input');
-        }
-
         if (nextChar === ':') {
           currentGroup.capture = nextChar;
           continue;
@@ -87,7 +83,7 @@ export const parse = (quasis, expressions) => {
         continue;
       }
 
-      throw new SyntaxError('Unexpected token ' + char);
+      throw new SyntaxError('Unexpected token "' + char + '"');
     }
 
     stackIndex++;
