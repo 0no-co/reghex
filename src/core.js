@@ -17,13 +17,6 @@ export const _exec = (state, pattern) => {
   if (typeof pattern === 'function') {
     while (typeof pattern === 'function') pattern = pattern(state);
     return pattern;
-  } else if (typeof pattern === 'string') {
-    const end = state.index + pattern.length;
-    const sub = state.input.slice(state.index, end);
-    if (sub === pattern) {
-      state.index = end;
-      match = sub;
-    }
   } else if (isStickySupported) {
     pattern.lastIndex = state.index;
     if (pattern.test(state.input)) {

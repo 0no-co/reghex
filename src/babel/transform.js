@@ -115,15 +115,6 @@ export function makeHelpers({ types: t, template }) {
               const matchPath = binding.path.get('init');
               if (this.isMatch(matchPath)) return expression;
             }
-          } else if (
-            t.isRegExpLiteral(expression) &&
-            !regexPatternsRe.test(expression.pattern)
-          ) {
-            // NOTE: This is an optimisation path, where the pattern regex is inlined
-            // and has determined to be "simple" enough to be turned into a string
-            return t.stringLiteral(
-              expression.pattern.replace(/\\./g, (x) => x[1])
-            );
           }
 
           const id = path.scope.generateUidIdentifier(

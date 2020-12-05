@@ -40,12 +40,14 @@ const node = match('node')([\\"\\", \\"+|\\", \\"+(\\", \\"(\\", \\"?\\", \\"))*
 exports[`works with local recursion 1`] = `
 "import { match as m, tag, _exec, _pattern } from 'reghex';
 
+var _inner_expression = _pattern(/inner/);
+
 const inner = function (state) {
   var index_1 = state.index;
   var node = [];
   var match;
 
-  if (match = _exec(state, \\"inner\\")) {
+  if (match = _exec(state, _inner_expression)) {
     node.push(match);
   } else {
     state.index = index_1;
