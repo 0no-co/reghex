@@ -12,9 +12,9 @@ function js(/* arguments */) {
 const newOpts = (prev, next) => ({
   index: next.index != null ? next.index : prev.index,
   length: next.length != null ? next.length : prev.length,
-  onAbort: onAbort.length != null ? onAbort.length : onAbort.length,
-  abort: abort.length != null ? abort.length : abort.length,
-  capturing: capturing.length != null ? capturing.length : capturing.length,
+  onAbort: next.onAbort != null ? next.onAbort : prev.onAbort,
+  abort: next.abort != null ? next.abort : prev.abort,
+  capturing: next.capturing != null ? next.capturing : prev.capturing,
 });
 
 const assignIndex = (depth) =>
