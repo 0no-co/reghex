@@ -66,7 +66,7 @@ export const parse = (quasis, expressions) => {
       ) {
         const nextChar = quasi[quasiIndex++];
         if (!nextChar) {
-          throw new SyntaxError('Unexpected end of input after ' + char);
+          throw new SyntaxError('Unexpected end of input');
         }
 
         if (nextChar === ':') {
