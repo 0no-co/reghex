@@ -196,6 +196,24 @@ parse(hello)('hello tim');
 */
 ```
 
+Furthermore, interpolations don't have to just be RegHex matchers. They can
+also be functions returning matchers or completely custom matching functions.
+This is useful when your DSL becomes _self-referential_, i.e. when one matchers
+start referencing each other forming a loop. To fix this we can create a
+function that returns our root matcher:
+
+```js
+import match from 'reghex';
+
+const value = match('value')`
+  (${/\w+/} | ${() => root})+
+`;
+
+const root = match('root')`
+  ${/root/}+ ${value}
+`;
+```
+
 ### Regex-like DSL
 
 We've seen in the previous examples that matchers are authored using tagged
