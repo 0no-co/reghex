@@ -9,6 +9,14 @@ function js(/* arguments */) {
   return body.trim();
 }
 
+const newOpts = (prev, next) => ({
+  index: next.index != null ? next.index : prev.index,
+  length: next.length != null ? next.length : prev.length,
+  onAbort: onAbort.length != null ? onAbort.length : onAbort.length,
+  abort: abort.length != null ? abort.length : abort.length,
+  capturing: capturing.length != null ? capturing.length : capturing.length,
+});
+
 const assignIndex = (depth) =>
   depth ? js`var index_${depth} = ${_state}.index;` : '';
 
@@ -66,18 +74,24 @@ const astGroup = (ast, depth, opts) => {
   if (!opts.length && capturing) {
     return js`
       ${js`var length_${depth} = ${_node}.length;`}
-      ${astSequence(ast.sequence, depth + 1, {
-        ...opts,
-        length: depth,
-        capturing,
-      })}
+      ${astSequence(
+        ast.sequence,
+        depth + 1,
+        newOpts(opts, {
+          length: depth,
+          capturing,
+        })
+      )}
     `;
   }
 
-  return astSequence(ast.sequence, depth + 1, {
-    ...opts,
-    capturing,
-  });
+  return astSequence(
+    ast.sequence,
+    depth + 1,
+    newOpts(opts, {
+      capturing,
+    })
+  );
 };
 
 const astChild = (ast, depth, opts) =>
@@ -91,9 +105,11 @@ const astRepeating = (ast, depth, opts) => {
   return js`
     ${label}: for (var ${count} = 0; true; ${count}++) {
       ${assignIndex(depth)}
-      ${astChild(ast, depth, {
-        ...opts,
-        onAbort: js`
+      ${astChild(
+        ast,
+        depth,
+        newOpts(opts, {
+          onAbort: js`
           if (${count}) {
             ${restoreIndex(depth)}
             break ${label};
@@ -101,7 +117,8 @@ const astRepeating = (ast, depth, opts) => {
             ${opts.onAbort || ''}
           }
         `,
-      })}
+        })
+      )}
     }
   `;
 };
@@ -111,25 +128,31 @@ const astMultiple = (ast, depth, opts) => {
   return js`
     ${label}: while (true) {
       ${assignIndex(depth)}
-      ${astChild(ast, depth, {
-        ...opts,
-        length: 0,
-        index: depth,
-        abort: js`break ${label};`,
-        onAbort: '',
-      })}
+      ${astChild(
+        ast,
+        depth,
+        newOpts(opts, {
+          length: 0,
+          index: depth,
+          abort: js`break ${label};`,
+          onAbort: '',
+        })
+      )}
     }
   `;
 };
 
 const astOptional = (ast, depth, opts) => js`
   ${assignIndex(depth)}
-  ${astChild(ast, depth, {
-    ...opts,
-    index: depth,
-    abort: '',
-    onAbort: '',
-  })}
+  ${astChild(
+    ast,
+    depth,
+    newOpts(opts, {
+      index: depth,
+      abort: '',
+      onAbort: '',
+    })
+  )}
 `;
 
 const astQuantifier = (ast, depth, opts) => {
@@ -137,11 +160,10 @@ const astQuantifier = (ast, depth, opts) => {
   const label = `invert_${depth}`;
 
   if (ast.lookahead === 'negative') {
-    opts = {
-      ...opts,
+    opts = newOpts(opts, {
       index: depth,
       abort: js`break ${label};`,
-    };
+    });
   }
 
   let child;
@@ -181,12 +203,11 @@ const astSequence = (ast, depth, opts) => {
 
     let childOpts = opts;
     if (ast.alternation) {
-      childOpts = {
-        ...childOpts,
+      childOpts = newOpts(opts, {
         index: depth,
         abort: js`break ${block};`,
         onAbort: '',
-      };
+      });
     }
 
     let sequence = '';

@@ -22,8 +22,8 @@ const plugins = [
       unicodeRegExp: false,
       dangerousForOf: true,
       templateString: false,
+      spreadRest: false,
     },
-    objectAssign: 'Object.assign',
     exclude: 'node_modules/**',
   }),
   babel({
@@ -31,10 +31,7 @@ const plugins = [
     extensions: ['ts', 'tsx', 'js'],
     exclude: 'node_modules/**',
     presets: [],
-    plugins: [
-      '@babel/plugin-transform-object-assign',
-      'babel-plugin-closure-elimination',
-    ],
+    plugins: ['babel-plugin-closure-elimination'],
   }),
 ];
 
