@@ -32,6 +32,11 @@ const node = function (state) {
 };"
 `;
 
+exports[`works while only minifying 1`] = `
+"import match from 'reghex/macro';
+const node = match('node')([\\"\\", \\"+|\\", \\"+(\\", \\"(\\", \\"?\\", \\"))*\\"], 1, 2, 3, 4, 5);"
+`;
+
 exports[`works with local recursion 1`] = `
 "import { tag, _exec, _pattern } from 'reghex';
 

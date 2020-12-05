@@ -1,6 +1,6 @@
 import { makeHelpers } from './transform';
 
-export default function reghexPlugin(babel) {
+export default function reghexPlugin(babel, opts = {}) {
   let helpers;
 
   return {
@@ -10,11 +10,16 @@ export default function reghexPlugin(babel) {
         helpers = makeHelpers(babel);
       },
       ImportDeclaration(path) {
+        if (opts.codegen === false) return;
         helpers.updateImport(path);
       },
       TaggedTemplateExpression(path) {
         if (helpers.isMatch(path) && helpers.getMatchImport(path)) {
-          helpers.transformMatch(path);
+          if (opts.codegen === false) {
+            helpers.minifyMatch(path);
+          } else {
+            helpers.transformMatch(path);
+          }
         }
       },
     },

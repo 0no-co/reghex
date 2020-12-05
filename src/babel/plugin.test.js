@@ -16,6 +16,24 @@ it('works with standard features', () => {
   ).toMatchSnapshot();
 });
 
+it('works while only minifying', () => {
+  const code = `
+    import match from 'reghex/macro';
+
+    const node = match('node')\`
+      \${1}+ | \${2}+ (\${3} ( \${4}? \${5} ) )*
+    \`;
+  `;
+
+  expect(
+    transform(code, {
+      babelrc: false,
+      presets: [],
+      plugins: [[reghexPlugin, { codegen: false }]],
+    }).code
+  ).toMatchSnapshot();
+});
+
 it('works with local recursion', () => {
   // NOTE: A different default name is allowed
   const code = `

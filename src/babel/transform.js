@@ -185,6 +185,29 @@ export function makeHelpers({ types: t, template }) {
       return id.name;
     },
 
+    minifyMatch(path) {
+      if (!path.node.tag.arguments.length) {
+        throw path
+          .get('tag')
+          .buildCodeFrameError(
+            'match() must at least be called with a node name'
+          );
+      }
+
+      const quasis = path.node.quasi.quasis.map((x) =>
+        t.stringLiteral(x.value.cooked.replace(/\s*/g, ''))
+      );
+      const expressions = path.node.quasi.expressions;
+      const transform = this._prepareTransform(path);
+
+      path.replaceWith(
+        t.callExpression(path.node.tag, [
+          t.arrayExpression(quasis),
+          ...expressions,
+        ])
+      );
+    },
+
     transformMatch(path) {
       if (!path.node.tag.arguments.length) {
         throw path
