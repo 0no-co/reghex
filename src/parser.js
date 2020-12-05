@@ -1,109 +1,59 @@
+const syntaxError = (char) => {
+  throw new SyntaxError('Unexpected token "' + char + '"');
+};
+
 export const parse = (quasis, expressions) => {
   let quasiIndex = 0;
   let stackIndex = 0;
 
   const sequenceStack = [];
-  const rootSequence = {
-    type: 'sequence',
-    sequence: [],
-    alternation: null,
-  };
+  const rootSequence = [];
 
   let currentGroup = null;
   let lastMatch;
   let currentSequence = rootSequence;
 
-  while (stackIndex < quasis.length + expressions.length) {
+  for (
+    let quasiIndex = 0, stackIndex = 0;
+    stackIndex < quasis.length + expressions.length;
+    stackIndex++
+  ) {
     if (stackIndex % 2 !== 0) {
-      const expression = expressions[stackIndex++ >> 1];
-
-      currentSequence.sequence.push({
-        type: 'expression',
-        expression,
-        quantifier: null,
+      currentSequence.push({
+        expression: expressions[stackIndex++ >> 1],
       });
     }
 
     const quasi = quasis[stackIndex >> 1];
-    while (quasiIndex < quasi.length) {
+    for (quasiIndex = 0; quasiIndex < quasi.length; ) {
       const char = quasi[quasiIndex++];
-
       if (char === ' ' || char === '\t' || char === '\r' || char === '\n') {
-        continue;
-      } else if (char === '|' && currentSequence.sequence.length > 0) {
-        currentSequence = currentSequence.alternation = {
-          type: 'sequence',
-          sequence: [],
-          alternation: null,
-        };
-
-        continue;
-      } else if (char === ')' && currentSequence.sequence.length > 0) {
+      } else if (char === '|' && currentSequence.length) {
+        currentSequence = currentSequence.alternation = [];
+      } else if (char === ')' && currentSequence.length) {
         currentGroup = null;
         currentSequence = sequenceStack.pop();
-        if (currentSequence) continue;
+        if (!currentSequence) syntaxError(char);
       } else if (char === '(') {
-        currentGroup = {
-          type: 'group',
-          sequence: {
-            type: 'sequence',
-            sequence: [],
-            alternation: null,
-          },
-          capturing: true,
-          lookahead: null,
-          quantifier: null,
-        };
-
         sequenceStack.push(currentSequence);
-        currentSequence.sequence.push(currentGroup);
+        currentSequence.push((currentGroup = { sequence: [] }));
         currentSequence = currentGroup.sequence;
-        continue;
-      } else if (
-        char === '?' &&
-        currentSequence.sequence.length === 0 &&
-        currentGroup
-      ) {
+      } else if (char === '?' && !currentSequence.length && currentGroup) {
         const nextChar = quasi[quasiIndex++];
-        if (!nextChar) {
-          throw new SyntaxError('Unexpected end of input after ' + char);
-        }
-
-        if (nextChar === ':') {
-          currentGroup.capturing = false;
-          continue;
-        } else if (nextChar === '=') {
-          currentGroup.capturing = false;
-          currentGroup.lookahead = 'positive';
-          continue;
-        } else if (nextChar === '!') {
-          currentGroup.capturing = false;
-          currentGroup.lookahead = 'negative';
-          continue;
+        if (nextChar === ':' || nextChar === '=' || nextChar === '!') {
+          currentGroup.capture = nextChar;
+        } else {
+          syntaxError(char);
         }
       } else if (
         (char === '?' || char === '+' || char === '*') &&
-        (lastMatch =
-          currentSequence.sequence[currentSequence.sequence.length - 1])
+        (lastMatch = currentSequence[currentSequence.length - 1])
       ) {
-        if (lastMatch.type === 'group' && lastMatch.lookahead) {
-          throw new SyntaxError('Unexpected quantifier on lookahead group');
-        }
-
-        lastMatch.quantifier = {
-          type: 'quantifier',
-          required: char === '+',
-          singular: char === '?',
-        };
-
-        continue;
+        lastMatch.quantifier = char;
+      } else {
+        syntaxError(char);
       }
-
-      throw new SyntaxError('Unexpected token ' + char);
     }
-
-    stackIndex++;
-    quasiIndex = 0;
   }
 
   return rootSequence;

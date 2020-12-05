@@ -10,7 +10,7 @@
   <br />
 </div>
 
-Leveraging the power of sticky regexes and Babel code generation, `reghex` allows
+Leveraging the power of sticky regexes and JS code generation, `reghex` allows
 you to code parsers quickly, by surrounding regular expressions with a regex-like
 [DSL](https://en.wikipedia.org/wiki/Domain-specific_language).
 
@@ -30,7 +30,9 @@ yarn add reghex
 npm install --save reghex
 ```
 
-##### 2. Add the plugin to your Babel configuration (`.babelrc`, `babel.config.js`, or `package.json:babel`)
+##### 2. Add the plugin to your Babel configuration _(optional)_
+
+In your `.babelrc`, `babel.config.js`, or `package.json:babel` add:
 
 ```json
 {
@@ -41,10 +43,20 @@ npm install --save reghex
 Alternatively, you can set up [`babel-plugin-macros`](https://github.com/kentcdodds/babel-plugin-macros) and
 import `reghex` from `"reghex/macro"` instead.
 
+This step is **optional**. `reghex` can also generate its optimised JS code during runtime.
+This will only incur a tiny parsing cost on initialisation, but due to the JIT of modern
+JS engines there won't be any difference in performance between pre-compiled and compiled
+versions otherwise.
+
+Since the `reghex` runtime is rather small, for larger grammars it may even make sense not
+to precompile the matchers at all. For this case you may pass the `{ "codegen": false }`
+option to the Babel plugin, which will minify the `reghex` matcher templates without
+precompiling them.
+
 ##### 3. Have fun writing parsers!
 
 ```js
-import match, { parse } from 'reghex';
+import { match, parse } from 'reghex';
 
 const name = match('name')`
   ${/\w+/}
@@ -99,20 +111,19 @@ that string, and the matcher functions execute regexes against this state.
 
 ## Authoring Guide
 
-You can write "matchers" by importing the default import from `reghex` and
+You can write "matchers" by importing the `match` import from `reghex` and
 using it to write a matcher expression.
 
 ```js
-import match from 'reghex';
+import { match } from 'reghex';
 
 const name = match('name')`
   ${/\w+/}
 `;
 ```
 
-As can be seen above, the `match` function, which is what we've called the
-default import, is called with a "node name" and is then called as a tagged
-template. This template is our **parsing definition**.
+As can be seen above, the `match` function, is called with a "node name" and
+is then called as a tagged template. This template is our **parsing definition**.
 
 `reghex` functions only with its Babel plugin, which will detect `match('name')`
 and replace the entire tag with a parsing function, which may then look like
@@ -161,7 +172,7 @@ To introduce nesting to `reghex` matchers, we can refer to one matcher in anothe
 Let's extend our original example;
 
 ```js
-import match from 'reghex';
+import { match } from 'reghex';
 
 const name = match('name')`
   ${/\w+/}
@@ -193,6 +204,24 @@ parse(hello)('hello tim');
 */
 ```
 
+Furthermore, interpolations don't have to just be RegHex matchers. They can
+also be functions returning matchers or completely custom matching functions.
+This is useful when your DSL becomes _self-referential_, i.e. when one matchers
+start referencing each other forming a loop. To fix this we can create a
+function that returns our root matcher:
+
+```js
+import { match } from 'reghex';
+
+const value = match('value')`
+  (${/\w+/} | ${() => root})+
+`;
+
+const root = match('root')`
+  ${/root/}+ ${value}
+`;
+```
+
 ### Regex-like DSL
 
 We've seen in the previous examples that matchers are authored using tagged
@@ -208,15 +237,15 @@ a row. A matcher using `${/1/} ${/2/}` will attempt to match `1` and then `2`
 in the parsed string. This is just one feature of the regex-like DSL. The
 available operators are the following:
 
-| Operator | Example            | Description                                                                                                                                                                                           |
-| -------- | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `?`      | `${/1/}?`          | An **optional** may be used to make an interpolation optional. This means that the interpolation may or may not match.                                                                            |
-| `*`      | `${/1/}*`          | A **star** can be used to match an arbitrary amount of interpolation or none at all. This means that the interpolation may repeat itself or may not be matched at all.                            |
-| `+`      | `${/1/}+`          | A **plus** is used like `*` and must match one or more times. When the matcher doesn't match, that's considered a failing case, since the match isn't optional.                                       |
-| `\|`     | `${/1/} \| ${/2/}` | An **alternation** can be used to match either one thing or another, falling back when the first interpolation fails.                                                                                 |
-| `()`     | `(${/1/} ${/2/})+` | A **group** can be used to apply one of the other operators to an entire group of interpolations.                                                                                                        |
+| Operator | Example            | Description                                                                                                                                                                              |
+| -------- | ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `?`      | `${/1/}?`          | An **optional** may be used to make an interpolation optional. This means that the interpolation may or may not match.                                                                   |
+| `*`      | `${/1/}*`          | A **star** can be used to match an arbitrary amount of interpolation or none at all. This means that the interpolation may repeat itself or may not be matched at all.                   |
+| `+`      | `${/1/}+`          | A **plus** is used like `*` and must match one or more times. When the matcher doesn't match, that's considered a failing case, since the match isn't optional.                          |
+| `\|`     | `${/1/} \| ${/2/}` | An **alternation** can be used to match either one thing or another, falling back when the first interpolation fails.                                                                    |
+| `()`     | `(${/1/} ${/2/})+` | A **group** can be used to apply one of the other operators to an entire group of interpolations.                                                                                        |
 | `(?: )`  | `(?: ${/1/})`      | A **non-capturing group** is like a regular group, but the interpolations matched inside it don't appear in the parser's output.                                                         |
-| `(?= )`  | `(?= ${/1/})`      | A **positive lookahead** checks whether interpolations match, and if so continues the matcher without changing the input. If it matches, it's essentially ignored.                             |
+| `(?= )`  | `(?= ${/1/})`      | A **positive lookahead** checks whether interpolations match, and if so continues the matcher without changing the input. If it matches, it's essentially ignored.                       |
 | `(?! )`  | `(?! ${/1/})`      | A **negative lookahead** checks whether interpolations _don't_ match, and if so continues the matcher without changing the input. If the interpolations do match the matcher is aborted. |
 
 We can combine and compose these operators to create more complex matchers.
@@ -320,7 +349,7 @@ By **returning a falsy value** in this matcher, we can also change the matcher t
 matched, which would cause other matchers to treat it like a mismatch!
 
 ```js
-import match, { parse } from 'reghex';
+import { match, parse } from 'reghex';
 
 const name = match('name')((x) => {
   return x[0] !== 'tim' ? x : undefined;

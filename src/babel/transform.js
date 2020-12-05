@@ -1,13 +1,12 @@
 import { parse } from '../parser';
+import { astRoot } from '../codegen';
 import { SharedIds } from './sharedIds';
-import { initGenerator, RootNode } from './generator';
 
-export function makeHelpers(t) {
+export function makeHelpers({ types: t, template }) {
   const regexPatternsRe = /^[()\[\]|.+?*]|[^\\][()\[\]|.+?*$^]|\\[wdsWDS]/;
   const importSourceRe = /reghex$|^reghex\/macro/;
   const importName = 'reghex';
   const ids = new SharedIds(t);
-  initGenerator(ids, t);
 
   let _hasUpdatedImport = false;
 
@@ -17,14 +16,6 @@ export function makeHelpers(t) {
       if (_hasUpdatedImport) return;
       if (!importSourceRe.test(path.node.source.value)) return;
       _hasUpdatedImport = true;
-
-      const defaultSpecifierIndex = path.node.specifiers.findIndex((node) => {
-        return t.isImportDefaultSpecifier(node);
-      });
-
-      if (defaultSpecifierIndex > -1) {
-        path.node.specifiers.splice(defaultSpecifierIndex, 1);
-      }
 
       if (path.node.source.value !== importName) {
         path.node.source = t.stringLiteral(importName);
@@ -36,10 +27,6 @@ export function makeHelpers(t) {
           t.identifier('_exec')
         ),
         t.importSpecifier(
-          (ids.substrId = path.scope.generateUidIdentifier('substr')),
-          t.identifier('_substr')
-        ),
-        t.importSpecifier(
           (ids.patternId = path.scope.generateUidIdentifier('pattern')),
           t.identifier('_pattern')
         )
@@ -48,6 +35,7 @@ export function makeHelpers(t) {
       const tagImport = path.node.specifiers.find((node) => {
         return t.isImportSpecifier(node) && node.imported.name === 'tag';
       });
+
       if (!tagImport) {
         path.node.specifiers.push(
           t.importSpecifier(
@@ -87,7 +75,7 @@ export function makeHelpers(t) {
         binding.kind !== 'module' ||
         !t.isImportDeclaration(binding.path.parent) ||
         !importSourceRe.test(binding.path.parent.source.value) ||
-        !t.isImportDefaultSpecifier(binding.path.node)
+        !t.isImportSpecifier(binding.path.node)
       ) {
         return null;
       }
@@ -119,6 +107,22 @@ export function makeHelpers(t) {
       const hoistedExpressions = path.node.quasi.expressions.map(
         (expression, i) => {
           if (
+            t.isArrowFunctionExpression(expression) &&
+            t.isIdentifier(expression.body)
+          ) {
+            expression = expression.body;
+          } else if (
+            (t.isFunctionExpression(expression) ||
+              t.isArrowFunctionExpression(expression)) &&
+            t.isBlockStatement(expression.body) &&
+            expression.body.body.length === 1 &&
+            t.isReturnStatement(expression.body.body[0]) &&
+            t.isIdentifier(expression.body.body[0].argument)
+          ) {
+            expression = expression.body.body[0].argument;
+          }
+
+          if (
             t.isIdentifier(expression) &&
             path.scope.hasBinding(expression.name)
           ) {
@@ -127,15 +131,6 @@ export function makeHelpers(t) {
               const matchPath = binding.path.get('init');
               if (this.isMatch(matchPath)) return expression;
             }
-          } else if (
-            t.isRegExpLiteral(expression) &&
-            !regexPatternsRe.test(expression.pattern)
-          ) {
-            // NOTE: This is an optimisation path, where the pattern regex is inlined
-            // and has determined to be "simple" enough to be turned into a string
-            return t.stringLiteral(
-              expression.pattern.replace(/\\./g, (x) => x[1])
-            );
           }
 
           const id = path.scope.generateUidIdentifier(
@@ -160,28 +155,24 @@ export function makeHelpers(t) {
       }
 
       return hoistedExpressions.map((id) => {
-        // Use _substr helper instead if the expression is a string
-        if (t.isStringLiteral(id)) {
-          return t.callExpression(ids.substr, [ids.state, id]);
-        }
-
-        // Directly call expression if it's sure to be another matcher
         const binding = path.scope.getBinding(id.name);
         if (binding && t.isVariableDeclarator(binding.path.node)) {
           const matchPath = binding.path.get('init');
-          if (this.isMatch(matchPath)) {
-            return t.callExpression(id, [ids.state]);
-          }
+          if (this.isMatch(matchPath)) return `${id.name}(state)`;
         }
 
-        return t.callExpression(ids.exec, [ids.state, id]);
+        const input = t.isStringLiteral(id)
+          ? JSON.stringify(id.value)
+          : id.name;
+        return `${ids.exec.name}(state, ${input})`;
       });
     },
 
     _prepareTransform(path) {
       const transformNode = path.node.tag.arguments[1];
+
       if (!transformNode) return null;
-      if (t.isIdentifier(transformNode)) return transformNode;
+      if (t.isIdentifier(transformNode)) return transformNode.name;
 
       const matchName = this.getMatchName(path);
       const id = path.scope.generateUidIdentifier(`${matchName}_transform`);
@@ -190,7 +181,31 @@ export function makeHelpers(t) {
       path
         .getStatementParent()
         .insertBefore(t.variableDeclaration('var', [declarator]));
-      return id;
+
+      return id.name;
+    },
+
+    minifyMatch(path) {
+      if (!path.node.tag.arguments.length) {
+        throw path
+          .get('tag')
+          .buildCodeFrameError(
+            'match() must at least be called with a node name'
+          );
+      }
+
+      const quasis = path.node.quasi.quasis.map((x) =>
+        t.stringLiteral(x.value.cooked.replace(/\s*/g, ''))
+      );
+      const expressions = path.node.quasi.expressions;
+      const transform = this._prepareTransform(path);
+
+      path.replaceWith(
+        t.callExpression(path.node.tag, [
+          t.arrayExpression(quasis),
+          ...expressions,
+        ])
+      );
     },
 
     transformMatch(path) {
@@ -202,12 +217,11 @@ export function makeHelpers(t) {
           );
       }
 
-      const matchName = this.getMatchName(path);
-      const nameNode = path.node.tag.arguments[0];
+      const name = path.node.tag.arguments[0];
       const quasis = path.node.quasi.quasis.map((x) => x.value.cooked);
 
       const expressions = this._prepareExpressions(path);
-      const transformNode = this._prepareTransform(path);
+      const transform = this._prepareTransform(path);
 
       let ast;
       try {
@@ -217,15 +231,11 @@ export function makeHelpers(t) {
         throw path.get('quasi').buildCodeFrameError(error.message);
       }
 
-      const generator = new RootNode(ast, nameNode, transformNode);
-      const body = t.blockStatement(generator.statements());
-      const matchFunctionId = path.scope.generateUidIdentifier(matchName);
-      const matchFunction = t.functionExpression(
-        matchFunctionId,
-        [ids.state],
-        body
+      const code = astRoot(ast, '%%name%%', transform && '%%transform%%');
+
+      path.replaceWith(
+        template.expression(code)(transform ? { name, transform } : { name })
       );
-      path.replaceWith(matchFunction);
     },
   };
 }

@@ -1,8 +1,8 @@
 import { createMacro } from 'babel-plugin-macros';
 import { makeHelpers } from './transform';
 
-function reghexMacro({ references, babel: { types: t } }) {
-  const helpers = makeHelpers(t);
+function reghexMacro({ references, babel }) {
+  const helpers = makeHelpers(babel);
   const defaultRefs = references.default || [];
 
   defaultRefs.forEach((ref) => {

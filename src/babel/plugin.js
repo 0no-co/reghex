@@ -1,20 +1,25 @@
 import { makeHelpers } from './transform';
 
-export default function reghexPlugin({ types }) {
+export default function reghexPlugin(babel, opts = {}) {
   let helpers;
 
   return {
     name: 'reghex',
     visitor: {
       Program() {
-        helpers = makeHelpers(types);
+        helpers = makeHelpers(babel);
       },
       ImportDeclaration(path) {
+        if (opts.codegen === false) return;
         helpers.updateImport(path);
       },
       TaggedTemplateExpression(path) {
         if (helpers.isMatch(path) && helpers.getMatchImport(path)) {
-          helpers.transformMatch(path);
+          if (opts.codegen === false) {
+            helpers.minifyMatch(path);
+          } else {
+            helpers.transformMatch(path);
+          }
         }
       },
     },
