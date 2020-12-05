@@ -1,7 +1,6 @@
 import commonjs from '@rollup/plugin-commonjs';
 import resolve from '@rollup/plugin-node-resolve';
 import buble from '@rollup/plugin-buble';
-import babel from 'rollup-plugin-babel';
 import compiler from '@ampproject/rollup-plugin-closure-compiler';
 
 import simplifyJSTags from './scripts/simplify-jstags-plugin.js';
@@ -24,13 +23,6 @@ const plugins = [
       templateString: false,
     },
     exclude: 'node_modules/**',
-  }),
-  babel({
-    babelrc: false,
-    extensions: ['ts', 'tsx', 'js'],
-    exclude: 'node_modules/**',
-    presets: [],
-    plugins: ['babel-plugin-closure-elimination'],
   }),
 ];
 

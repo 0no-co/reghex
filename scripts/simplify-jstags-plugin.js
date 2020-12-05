@@ -1,6 +1,9 @@
 import { transformSync as transform } from '@babel/core';
 import { createFilter } from '@rollup/pluginutils';
 
+import transformTemplateLiterals from '@babel/plugin-transform-template-literals';
+import eliminateClosures from 'babel-plugin-closure-elimination';
+
 const simplifyJSTags = ({ types: t }) => ({
   visitor: {
     TaggedTemplateExpression(path) {
@@ -44,7 +47,11 @@ function simplifyJSTagsPlugin(opts = {}) {
       }
 
       return transform(code, {
-        plugins: [simplifyJSTags],
+        plugins: [
+          simplifyJSTags,
+          [transformTemplateLiterals, { loose: true }],
+          eliminateClosures,
+        ],
         babelrc: false,
       });
     },
