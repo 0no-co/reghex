@@ -8,7 +8,7 @@ export const _pattern = (input) => {
   const source = typeof input !== 'string' ? input.source : input;
   return isStickySupported
     ? new RegExp(source, 'y')
-    : new RegExp(`^(?:${source})`, 'g');
+    : new RegExp(source + '|()', 'g');
 };
 
 export const _exec = (state, pattern) => {
@@ -17,21 +17,18 @@ export const _exec = (state, pattern) => {
   if (typeof pattern === 'function') {
     if (!pattern.length) pattern = pattern();
     return pattern(state);
-  } else if (isStickySupported) {
-    pattern.lastIndex = state.index;
-    if (pattern.test(state.input)) {
-      match = state.input.slice(state.index, pattern.lastIndex);
-      state.index = pattern.lastIndex;
-    }
-  } else {
-    pattern.lastIndex = 0;
-    if (pattern.test(state.input.slice(state.index))) {
-      const lastIndex = state.index + pattern.lastIndex;
-      match = state.input.slice(state.index, lastIndex);
-      state.index = lastIndex;
-    }
   }
 
+  pattern.lastIndex = state.index;
+
+  if (isStickySupported) {
+    if (pattern.test(state.input))
+      match = state.input.slice(state.index, pattern.lastIndex);
+  } else {
+    match = pattern.exec(state.input)[0] || match;
+  }
+
+  state.index = pattern.lastIndex;
   return match;
 };
 
