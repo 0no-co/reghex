@@ -1,3 +1,7 @@
+const syntaxError = (char) => {
+  throw new SyntaxError('Unexpected token "' + char + '"');
+};
+
 export const parse = (quasis, expressions) => {
   let quasiIndex = 0;
   let stackIndex = 0;
@@ -9,7 +13,11 @@ export const parse = (quasis, expressions) => {
   let lastMatch;
   let currentSequence = rootSequence;
 
-  while (stackIndex < quasis.length + expressions.length) {
+  for (
+    let quasiIndex = 0, stackIndex = 0;
+    stackIndex < quasis.length + expressions.length;
+    stackIndex++
+  ) {
     if (stackIndex % 2 !== 0) {
       currentSequence.push({
         expression: expressions[stackIndex++ >> 1],
@@ -17,52 +25,35 @@ export const parse = (quasis, expressions) => {
     }
 
     const quasi = quasis[stackIndex >> 1];
-    while (quasiIndex < quasi.length) {
+    for (quasiIndex = 0; quasiIndex < quasi.length; ) {
       const char = quasi[quasiIndex++];
-
       if (char === ' ' || char === '\t' || char === '\r' || char === '\n') {
-        continue;
       } else if (char === '|' && currentSequence.length) {
         currentSequence = currentSequence.alternation = [];
-        continue;
       } else if (char === ')' && currentSequence.length) {
         currentGroup = null;
         currentSequence = sequenceStack.pop();
-        if (currentSequence) continue;
+        if (!currentSequence) syntaxError(char);
       } else if (char === '(') {
-        currentGroup = {
-          sequence: [],
-        };
-
         sequenceStack.push(currentSequence);
-        currentSequence.push(currentGroup);
+        currentSequence.push((currentGroup = { sequence: [] }));
         currentSequence = currentGroup.sequence;
-        continue;
       } else if (char === '?' && !currentSequence.length && currentGroup) {
         const nextChar = quasi[quasiIndex++];
-        if (nextChar === ':') {
+        if (nextChar === ':' || nextChar === '=' || nextChar === '!') {
           currentGroup.capture = nextChar;
-          continue;
-        } else if (nextChar === '=') {
-          currentGroup.capture = nextChar;
-          continue;
-        } else if (nextChar === '!') {
-          currentGroup.capture = nextChar;
-          continue;
+        } else {
+          syntaxError(char);
         }
       } else if (
         (char === '?' || char === '+' || char === '*') &&
         (lastMatch = currentSequence[currentSequence.length - 1])
       ) {
         lastMatch.quantifier = char;
-        continue;
+      } else {
+        syntaxError(char);
       }
-
-      throw new SyntaxError('Unexpected token "' + char + '"');
     }
-
-    stackIndex++;
-    quasiIndex = 0;
   }
 
   return rootSequence;
