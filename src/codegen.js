@@ -2,10 +2,10 @@ const _state = 'state';
 const _match = 'match';
 const _node = 'node';
 
-export function js(/* arguments */) {
+function js(/* arguments */) {
   let body = arguments[0][0];
   for (let i = 1; i < arguments.length; i++)
-    body = body + arguments[i] + (arguments[0][i] || '');
+    body = body + arguments[i] + arguments[0][i];
   return body.trim();
 }
 
@@ -144,12 +144,11 @@ const astQuantifier = (ast, depth, opts) => {
   }
 
   let child;
-  if (ast.quantifier && !ast.quantifier.singular && ast.quantifier.required) {
+  if (ast.quantifier === 'repeating') {
     child = astRepeating(ast, depth, opts);
-  } else if (ast.quantifier && !ast.quantifier.singular)
+  } else if (ast.quantifier === 'multiple')
     child = astMultiple(ast, depth, opts);
-  else if (ast.quantifier && !ast.quantifier.required)
-    child = astOptional(ast, depth, opts);
+  else if (ast.quantifier === 'optional') child = astOptional(ast, depth, opts);
   else child = astChild(ast, depth, opts);
 
   if (ast.lookahead === 'negative') {

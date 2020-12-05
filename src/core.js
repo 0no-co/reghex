@@ -1,11 +1,10 @@
-import { js, astRoot } from './codegen';
+import { astRoot } from './codegen';
 import { parse as parseDSL } from './parser';
 
 const isStickySupported = typeof /./g.sticky === 'boolean';
 
 export const _pattern = (input) => {
   if (typeof input === 'function') return input;
-
   const source = typeof input !== 'string' ? input.source : input;
   return isStickySupported
     ? new RegExp(source, 'y')

@@ -86,16 +86,9 @@ export const parse = (quasis, expressions) => {
         (lastMatch =
           currentSequence.sequence[currentSequence.sequence.length - 1])
       ) {
-        if (lastMatch.type === 'group' && lastMatch.lookahead) {
-          throw new SyntaxError('Unexpected quantifier on lookahead group');
-        }
-
-        lastMatch.quantifier = {
-          type: 'quantifier',
-          required: char === '+',
-          singular: char === '?',
-        };
-
+        lastMatch.quantifier = 'optional';
+        if (char === '+') lastMatch.quantifier = 'repeating';
+        if (char === '*') lastMatch.quantifier = 'multiple';
         continue;
       }
 

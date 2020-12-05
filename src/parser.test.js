@@ -21,27 +21,15 @@ it('supports parsing expressions with quantifiers', () => {
 
   ast = parseTag`${1}?`;
   expect(ast).toHaveProperty('sequence.0.type', 'expression');
-  expect(ast).toHaveProperty('sequence.0.quantifier', {
-    type: 'quantifier',
-    required: false,
-    singular: true,
-  });
+  expect(ast).toHaveProperty('sequence.0.quantifier', 'optional');
 
   ast = parseTag`${1}+`;
   expect(ast).toHaveProperty('sequence.0.type', 'expression');
-  expect(ast).toHaveProperty('sequence.0.quantifier', {
-    type: 'quantifier',
-    required: true,
-    singular: false,
-  });
+  expect(ast).toHaveProperty('sequence.0.quantifier', 'repeating');
 
   ast = parseTag`${1}*`;
   expect(ast).toHaveProperty('sequence.0.type', 'expression');
-  expect(ast).toHaveProperty('sequence.0.quantifier', {
-    type: 'quantifier',
-    required: false,
-    singular: false,
-  });
+  expect(ast).toHaveProperty('sequence.0.quantifier', 'multiple');
 });
 
 it('supports top-level alternations', () => {
@@ -55,11 +43,7 @@ it('supports top-level alternations', () => {
   expect(ast).toHaveProperty('alternation.sequence.0.expression', 2);
 
   ast = parseTag`${1}? | ${2}?`;
-  expect(ast).toHaveProperty('sequence.0.quantifier.type', 'quantifier');
-  expect(ast).toHaveProperty(
-    'alternation.sequence.0.quantifier.type',
-    'quantifier'
-  );
+  expect(ast).toHaveProperty('sequence.0.quantifier', 'optional');
 });
 
 it('supports groups with quantifiers', () => {
@@ -75,12 +59,8 @@ it('supports groups with quantifiers', () => {
   ast = parseTag`(${1} ${2}?)?`;
   expect(ast).toHaveProperty('sequence.length', 1);
   expect(ast).toHaveProperty('sequence.0.type', 'group');
-  expect(ast).toHaveProperty('sequence.0.quantifier.type', 'quantifier');
+  expect(ast).toHaveProperty('sequence.0.quantifier', 'optional');
   expect(ast).toHaveProperty('sequence.0.sequence.sequence.0.quantifier', null);
-  expect(ast).toHaveProperty(
-    'sequence.0.sequence.sequence.1.quantifier.type',
-    'quantifier'
-  );
 });
 
 it('supports non-capturing groups', () => {
@@ -108,12 +88,6 @@ it('supports negative lookahead groups', () => {
   expect(ast).toHaveProperty('sequence.0.capturing', false);
   expect(ast).toHaveProperty('sequence.0.lookahead', 'negative');
   expect(ast).toHaveProperty('sequence.0.sequence.sequence.length', 1);
-});
-
-it('throws when a quantifier is combined with a lookahead', () => {
-  expect(() => parseTag`(?! ${1})+`).toThrow();
-  expect(() => parseTag`(?! ${1})?`).toThrow();
-  expect(() => parseTag`(?! ${1})*`).toThrow();
 });
 
 it('supports groups with alternates', () => {
