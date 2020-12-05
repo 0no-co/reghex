@@ -40,6 +40,7 @@ const output = (format = 'cjs', ext = '.js') => ({
   entryFileNames: 'reghex-[name]' + ext,
   dir: './dist',
   exports: 'named',
+  preserveModules: true,
   externalLiveBindings: false,
   sourcemap: true,
   esModule: false,
@@ -49,12 +50,7 @@ const output = (format = 'cjs', ext = '.js') => ({
   format,
 });
 
-export default {
-  input: {
-    core: './src/core.js',
-    babel: './src/babel/plugin.js',
-    macro: './src/babel/macro.js',
-  },
+const base = {
   onwarn: () => {},
   external: () => false,
   treeshake: {
@@ -63,3 +59,19 @@ export default {
   plugins,
   output: [output('cjs', '.js'), output('esm', '.mjs')],
 };
+
+export default [
+  {
+    ...base,
+    input: {
+      core: './src/core.js',
+    },
+  },
+  {
+    ...base,
+    input: {
+      babel: './src/babel/plugin.js',
+      macro: './src/babel/macro.js',
+    },
+  },
+];

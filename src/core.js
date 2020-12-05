@@ -1,3 +1,6 @@
+import { js, astRoot } from './codegen';
+import { parse as parseDSL } from './parser';
+
 const isStickySupported = typeof /./g.sticky === 'boolean';
 
 export const _pattern = (input) => {
@@ -39,19 +42,22 @@ export const _exec = (state, pattern) => {
   return match;
 };
 
-export const tag = (array, tag) => {
-  array.tag = tag;
-  return array;
-};
-
 export const parse = (pattern) => (input) => {
   const state = { input, index: 0 };
   return pattern(state);
 };
 
-export const match = (_name) => {
-  throw new TypeError(
-    'This match() function was not transformed. ' +
-      'Ensure that the Babel plugin is set up correctly and try again.'
+export const match = (name, transform) => (quasis, ...expressions) => {
+  const ast = parseDSL(
+    quasis,
+    expressions.map((expression, i) => `_exec(state, _e${i})`)
   );
+  const makeMatcher = new Function(
+    '_exec',
+    '_name',
+    '_transform',
+    ...expressions.map((_expression, i) => `_e${i}`),
+    'return ' + astRoot(ast, '_name', transform ? '_transform' : null)
+  );
+  return makeMatcher(_exec, name, transform, ...expressions.map(_pattern));
 };

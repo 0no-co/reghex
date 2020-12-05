@@ -1,48 +1,9 @@
-import * as reghex from '../../../src/core';
-import * as types from '@babel/types';
-import template from '@babel/template';
-import { transform } from '@babel/core';
-import { makeHelpers } from '../transform';
-
-const match = (name) => (quasis, ...expressions) => {
-  const helpers = makeHelpers({ types, template });
-
-  let str = '';
-  for (let i = 0; i < quasis.length; i++) {
-    str += quasis[i];
-    if (i < expressions.length) str += '${' + expressions[i].toString() + '}';
-  }
-
-  const testPlugin = () => ({
-    visitor: {
-      TaggedTemplateExpression(path) {
-        helpers.transformMatch(path);
-      },
-    },
-  });
-
-  const { code } = transform(
-    `(function () { return match('${name}')\`${str}\`; })()`,
-    {
-      babelrc: false,
-      presets: [],
-      plugins: [testPlugin],
-    }
-  );
-
-  const argKeys = Object.keys(reghex).filter((x) => {
-    return x.startsWith('_') || x === 'tag';
-  });
-
-  const args = argKeys.map((key) => reghex[key]);
-  return new Function(...argKeys, 'return ' + code)(...args);
-};
+import { match } from './core';
 
 const expectToParse = (node, input, result, lastIndex = 0) => {
   const state = { input, index: 0 };
-  expect(node(state)).toEqual(
-    result === undefined ? result : reghex.tag(result, 'node')
-  );
+  if (result) result.tag = 'node';
+  expect(node(state)).toEqual(result);
 
   // NOTE: After parsing we expect the current index to exactly match the
   // sum amount of matched characters
