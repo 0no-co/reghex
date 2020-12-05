@@ -65,7 +65,7 @@ const astGroup = (ast, depth, opts) => {
   if (!opts.length && capturing) {
     return js`
       ${js`var length_${depth} = ${_node}.length;`}
-      ${astAlternation(ast.sequence, depth + 1, {
+      ${astSequence(ast.sequence, depth + 1, {
         ...opts,
         length: depth,
         capturing,
@@ -73,7 +73,7 @@ const astGroup = (ast, depth, opts) => {
     `;
   }
 
-  return astAlternation(ast.sequence, depth + 1, {
+  return astSequence(ast.sequence, depth + 1, {
     ...opts,
     capturing,
   });
@@ -172,45 +172,44 @@ const astQuantifier = (ast, depth, opts) => {
 };
 
 const astSequence = (ast, depth, opts) => {
-  const block = `block_${depth}`;
-  const alternation = `alternation_${depth}`;
+  const alternation = ast.alternation ? `alternation_${depth}` : '';
 
-  if (ast.alternation) {
-    opts = {
-      ...opts,
-      index: depth,
-      abort: js`break ${block};`,
-      onAbort: '',
-    };
-  }
+  let body = '';
+  for (; ast; ast = ast.alternation) {
+    const block = `block_${depth}`;
 
-  let sequence = '';
-  for (let i = 0; i < ast.sequence.length; i++)
-    sequence += astQuantifier(ast.sequence[i], depth, opts);
-
-  if (!ast.alternation) {
-    return sequence;
-  }
-
-  return js`
-    ${block}: {
-      ${assignIndex(depth)}
-      ${sequence}
-      break ${alternation};
+    let childOpts = opts;
+    if (ast.alternation) {
+      childOpts = {
+        ...childOpts,
+        index: depth,
+        abort: js`break ${block};`,
+        onAbort: '',
+      };
     }
-  `;
-};
 
-const astAlternation = (ast, depth, opts) => {
-  if (!ast.alternation) return astSequence(ast, depth, opts);
+    let sequence = '';
+    for (let i = 0; i < ast.sequence.length; i++)
+      sequence += astQuantifier(ast.sequence[i], depth, childOpts);
 
-  let sequence = '';
-  for (let child = ast; child; child = child.alternation)
-    sequence += astSequence(child, depth, opts);
+    if (!ast.alternation) {
+      body += sequence;
+    } else {
+      body += js`
+        ${block}: {
+          ${assignIndex(depth)}
+          ${sequence}
+          break ${alternation};
+        }
+      `;
+    }
+  }
+
+  if (!alternation) return body;
 
   return js`
-    alternation_${depth}: {
-      ${sequence}
+    ${alternation}: {
+      ${body}
     }
   `;
 };
@@ -221,7 +220,7 @@ const astRoot = (ast, name, transform) => js`
     var ${_node} = [];
     var ${_match};
 
-    ${astAlternation(ast, 2, {
+    ${astSequence(ast, 2, {
       index: 1,
       length: 0,
       onAbort: '',
