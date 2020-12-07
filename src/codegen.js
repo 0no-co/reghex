@@ -1,6 +1,6 @@
 const _state = 'state';
-const _match = 'match';
 const _node = 'node';
+const _match = 'x';
 
 function js(/* arguments */) {
   let body = arguments[0][0];
@@ -16,33 +16,30 @@ const copy = (prev) => {
 };
 
 const assignIndex = (depth) =>
-  depth ? js`var index_${depth} = ${_state}.index;` : '';
+  depth ? js`var idx${depth} = ${_state}.index;` : '';
 
 const restoreIndex = (depth) =>
-  depth ? js`${_state}.index = index_${depth};` : '';
+  depth ? js`${_state}.index = idx${depth};` : '';
 
 const abortOnCondition = (condition, hooks) => js`
   if (${condition}) {
     ${restoreIndex(opts.index)}
-    ${opts.abort || ''}
+    ${opts.abort}
   } else {
-    ${opts.onAbort || ''}
+    ${opts.onAbort}
   }
 `;
 
 const astExpression = (ast, depth, opts) => {
   const restoreLength =
-    opts.length &&
-    opts.abort &&
-    js`
-    ${_node}.length = length_${opts.length};
-  `;
+    (opts.length && opts.abort && js`${_node}.length = ln${opts.length};`) ||
+    '';
 
   const abort = js`
-    ${opts.onAbort || ''}
+    ${opts.onAbort}
     ${restoreIndex(opts.index)}
-    ${restoreLength || ''}
-    ${opts.abort || ''}
+    ${restoreLength}
+    ${opts.abort}
   `;
 
   if (!opts.capture) {
@@ -72,7 +69,7 @@ const astGroup = (ast, depth, opts) => {
   if (!opts.length && capture) {
     opts.length = depth;
     return js`
-      ${js`var length_${depth} = ${_node}.length;`}
+      ${js`var ln${depth} = ${_node}.length;`}
       ${astSequence(ast.sequence, depth + 1, opts)}
     `;
   }
@@ -85,9 +82,9 @@ const astChild = (ast, depth, opts) =>
 
 const astQuantifier = (ast, depth, opts) => {
   const { index, abort, onAbort } = opts;
-  const invert = `invert_${depth}`;
+  const invert = `inv_${depth}`;
   const loop = `loop_${depth}`;
-  const count = `count_${depth}`;
+  const count = `j${depth}`;
 
   opts = copy(opts);
   if (ast.capture === '!') {
@@ -107,7 +104,7 @@ const astQuantifier = (ast, depth, opts) => {
     `;
 
     child = js`
-      ${loop}: for (var ${count} = 0; true; ${count}++) {
+      ${loop}: for (var ${count} = 0; 1; ${count}++) {
         ${assignIndex(depth)}
         ${astChild(ast, depth, opts)}
       }
@@ -119,7 +116,7 @@ const astQuantifier = (ast, depth, opts) => {
     opts.onAbort = '';
 
     child = js`
-      ${loop}: while (true) {
+      ${loop}: for (;;) {
         ${assignIndex(depth)}
         ${astChild(ast, depth, opts)}
       }

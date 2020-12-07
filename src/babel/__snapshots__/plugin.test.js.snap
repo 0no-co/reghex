@@ -9,21 +9,21 @@ var _node_expression = (0, _reghex._pattern)(1),
     _node_expression2 = (0, _reghex._pattern)(2);
 
 const node = function (state) {
-  var index_1 = state.index;
+  var idx1 = state.index;
   var node = [];
-  var match;
+  var x;
 
-  if (match = (0, _reghex._exec)(state, _node_expression)) {
-    node.push(match);
+  if (x = (0, _reghex._exec)(state, _node_expression)) {
+    node.push(x);
   } else {
-    state.index = index_1;
+    state.index = idx1;
     return;
   }
 
-  if (match = (0, _reghex._exec)(state, _node_expression2)) {
-    node.push(match);
+  if (x = (0, _reghex._exec)(state, _node_expression2)) {
+    node.push(x);
   } else {
-    state.index = index_1;
+    state.index = idx1;
     return;
   }
 
@@ -43,14 +43,14 @@ exports[`works with local recursion 1`] = `
 var _inner_expression = _pattern(/inner/);
 
 const inner = function (state) {
-  var index_1 = state.index;
+  var idx1 = state.index;
   var node = [];
-  var match;
+  var x;
 
-  if (match = _exec(state, _inner_expression)) {
-    node.push(match);
+  if (x = _exec(state, _inner_expression)) {
+    node.push(x);
   } else {
-    state.index = index_1;
+    state.index = idx1;
     return;
   }
 
@@ -59,14 +59,14 @@ const inner = function (state) {
 };
 
 const node = function (state) {
-  var index_1 = state.index;
+  var idx1 = state.index;
   var node = [];
-  var match;
+  var x;
 
-  if (match = inner(state)) {
-    node.push(match);
+  if (x = inner(state)) {
+    node.push(x);
   } else {
-    state.index = index_1;
+    state.index = idx1;
     return;
   }
 
@@ -83,45 +83,45 @@ var _node_expression = _pattern(1),
     _node_expression3 = _pattern(3);
 
 const node = function (state) {
-  var index_1 = state.index;
+  var idx1 = state.index;
   var node = [];
-  var match;
+  var x;
 
-  if (match = _exec(state, _node_expression)) {
-    node.push(match);
+  if (x = _exec(state, _node_expression)) {
+    node.push(x);
   } else {
-    state.index = index_1;
+    state.index = idx1;
     return;
   }
 
-  var length_2 = node.length;
+  var ln2 = node.length;
 
   alternation_3: {
     block_3: {
-      var index_3 = state.index;
+      var idx3 = state.index;
 
-      if (match = _exec(state, _node_expression2)) {
-        node.push(match);
+      if (x = _exec(state, _node_expression2)) {
+        node.push(x);
       } else {
-        state.index = index_3;
-        node.length = length_2;
+        state.index = idx3;
+        node.length = ln2;
         break block_3;
       }
 
       break alternation_3;
     }
 
-    loop_3: for (var count_3 = 0; true; count_3++) {
-      var index_3 = state.index;
+    loop_3: for (var j3 = 0; 1; j3++) {
+      var idx3 = state.index;
 
       if (!_exec(state, _node_expression3)) {
-        if (count_3) {
-          state.index = index_3;
+        if (j3) {
+          state.index = idx3;
           break loop_3;
         } else {}
 
-        state.index = index_1;
-        node.length = length_2;
+        state.index = idx1;
+        node.length = ln2;
         return;
       }
     }
@@ -136,14 +136,14 @@ exports[`works with self-referential thunks 1`] = `
 "import { match, tag, _exec, _pattern } from 'reghex';
 
 const inner = function (state) {
-  var index_1 = state.index;
+  var idx1 = state.index;
   var node = [];
-  var match;
+  var x;
 
-  if (match = node(state)) {
-    node.push(match);
+  if (x = node(state)) {
+    node.push(x);
   } else {
-    state.index = index_1;
+    state.index = idx1;
     return;
   }
 
@@ -152,14 +152,14 @@ const inner = function (state) {
 };
 
 const node = function (state) {
-  var index_1 = state.index;
+  var idx1 = state.index;
   var node = [];
-  var match;
+  var x;
 
-  if (match = inner(state)) {
-    node.push(match);
+  if (x = inner(state)) {
+    node.push(x);
   } else {
-    state.index = index_1;
+    state.index = idx1;
     return;
   }
 
@@ -178,26 +178,26 @@ var _node_expression = _pattern(1),
     _node_expression5 = _pattern(5);
 
 const node = function (state) {
-  var index_1 = state.index;
+  var idx1 = state.index;
   var node = [];
-  var match;
+  var x;
 
   alternation_2: {
     block_2: {
-      var index_2 = state.index;
+      var idx2 = state.index;
 
-      loop_2: for (var count_2 = 0; true; count_2++) {
-        var index_2 = state.index;
+      loop_2: for (var j2 = 0; 1; j2++) {
+        var idx2 = state.index;
 
-        if (match = _exec(state, _node_expression)) {
-          node.push(match);
+        if (x = _exec(state, _node_expression)) {
+          node.push(x);
         } else {
-          if (count_2) {
-            state.index = index_2;
+          if (j2) {
+            state.index = idx2;
             break loop_2;
           } else {}
 
-          state.index = index_2;
+          state.index = idx2;
           break block_2;
         }
       }
@@ -205,47 +205,47 @@ const node = function (state) {
       break alternation_2;
     }
 
-    loop_2: for (var count_2 = 0; true; count_2++) {
-      var index_2 = state.index;
+    loop_2: for (var j2 = 0; 1; j2++) {
+      var idx2 = state.index;
 
-      if (match = _exec(state, _node_expression2)) {
-        node.push(match);
+      if (x = _exec(state, _node_expression2)) {
+        node.push(x);
       } else {
-        if (count_2) {
-          state.index = index_2;
+        if (j2) {
+          state.index = idx2;
           break loop_2;
         } else {}
 
-        state.index = index_1;
+        state.index = idx1;
         return;
       }
     }
 
-    loop_2: while (true) {
-      var index_2 = state.index;
-      var length_2 = node.length;
+    loop_2: for (;;) {
+      var idx2 = state.index;
+      var ln2 = node.length;
 
-      if (match = _exec(state, _node_expression3)) {
-        node.push(match);
+      if (x = _exec(state, _node_expression3)) {
+        node.push(x);
       } else {
-        state.index = index_2;
-        node.length = length_2;
+        state.index = idx2;
+        node.length = ln2;
         break loop_2;
       }
 
-      var index_4 = state.index;
+      var idx4 = state.index;
 
-      if (match = _exec(state, _node_expression4)) {
-        node.push(match);
+      if (x = _exec(state, _node_expression4)) {
+        node.push(x);
       } else {
-        state.index = index_4;
+        state.index = idx4;
       }
 
-      if (match = _exec(state, _node_expression5)) {
-        node.push(match);
+      if (x = _exec(state, _node_expression5)) {
+        node.push(x);
       } else {
-        state.index = index_2;
-        node.length = length_2;
+        state.index = idx2;
+        node.length = ln2;
         break loop_2;
       }
     }
@@ -262,9 +262,9 @@ exports[`works with transform functions 1`] = `
 var _inner_transform = x => x;
 
 const first = function (state) {
-  var index_1 = state.index;
+  var idx1 = state.index;
   var node = [];
-  var match;
+  var x;
   node.tag = 'inner';
   return _inner_transform(node);
 };
@@ -272,9 +272,9 @@ const first = function (state) {
 const transform = x => x;
 
 const second = function (state) {
-  var index_1 = state.index;
+  var idx1 = state.index;
   var node = [];
-  var match;
+  var x;
   node.tag = 'node';
   return transform(node);
 };"
