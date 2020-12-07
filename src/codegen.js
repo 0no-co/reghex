@@ -9,13 +9,12 @@ function js(/* arguments */) {
   return body.trim();
 }
 
-const newOpts = (prev, next) => ({
-  index: next.index != null ? next.index : prev.index,
-  length: next.length != null ? next.length : prev.length,
-  onAbort: next.onAbort != null ? next.onAbort : prev.onAbort,
-  abort: next.abort != null ? next.abort : prev.abort,
-  capture: next.capture != null ? next.capture : prev.capture,
-});
+const makeOpts = (prev, next) => {
+  const output = {};
+  for (const key in prev) output[key] = prev[key];
+  for (const key in next) output[key] = next[key];
+  return output;
+};
 
 const assignIndex = (depth) =>
   depth ? js`var index_${depth} = ${_state}.index;` : '';
@@ -74,7 +73,7 @@ const astGroup = (ast, depth, opts) => {
       ${astSequence(
         ast.sequence,
         depth + 1,
-        newOpts(opts, {
+        makeOpts(opts, {
           length: depth,
           capture,
         })
@@ -85,7 +84,7 @@ const astGroup = (ast, depth, opts) => {
   return astSequence(
     ast.sequence,
     depth + 1,
-    newOpts(opts, {
+    makeOpts(opts, {
       capture,
     })
   );
@@ -103,7 +102,7 @@ const astRepeating = (ast, depth, opts) => {
       ${astChild(
         ast,
         depth,
-        newOpts(opts, {
+        makeOpts(opts, {
           onAbort: js`
           if (${count}) {
             ${restoreIndex(depth)}
@@ -126,7 +125,7 @@ const astMultiple = (ast, depth, opts) => {
       ${astChild(
         ast,
         depth,
-        newOpts(opts, {
+        makeOpts(opts, {
           length: 0,
           index: depth,
           abort: js`break ${label};`,
@@ -142,7 +141,7 @@ const astOptional = (ast, depth, opts) => js`
   ${astChild(
     ast,
     depth,
-    newOpts(opts, {
+    makeOpts(opts, {
       index: depth,
       abort: '',
       onAbort: '',
@@ -155,7 +154,7 @@ const astQuantifier = (ast, depth, opts) => {
   const label = `invert_${depth}`;
 
   if (ast.capture === '!') {
-    opts = newOpts(opts, {
+    opts = makeOpts(opts, {
       index: depth,
       abort: js`break ${label};`,
     });
@@ -197,7 +196,7 @@ const astSequence = (ast, depth, opts) => {
 
     let childOpts = opts;
     if (ast.alternation) {
-      childOpts = newOpts(opts, {
+      childOpts = makeOpts(opts, {
         index: depth,
         abort: js`break ${block};`,
         onAbort: '',
