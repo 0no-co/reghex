@@ -1,4 +1,4 @@
-import { astRoot } from './codegen';
+import { astRoot, _exec as execId } from './codegen';
 import { parse as parseDSL } from './parser';
 
 const isStickySupported = typeof /./g.sticky === 'boolean';
@@ -40,15 +40,14 @@ export const parse = (pattern) => (input) => {
 export const match = (name, transform) => (quasis, ...expressions) => {
   const ast = parseDSL(
     quasis,
-    expressions.map((expression, i) =>
-      typeof expression === 'function' && expression.length
-        ? `_${i}(state)`
-        : `_e(state, _${i})`
-    )
+    expressions.map((expression, i) => ({
+      fn: typeof expression === 'function' && expression.length,
+      id: `_${i}`,
+    }))
   );
 
   const makeMatcher = new Function(
-    '_e,_n,_t,' + expressions.map((_expression, i) => `_${i}`).join(','),
+    execId + ',_n,_t,' + expressions.map((_expression, i) => `_${i}`).join(','),
     'return ' + astRoot(ast, '_n', transform ? '_t' : null)
   );
 

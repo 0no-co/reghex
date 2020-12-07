@@ -1,3 +1,4 @@
+export const _exec = '_exec';
 const _state = 'state';
 const _node = 'node';
 const _match = 'x';
@@ -42,16 +43,20 @@ const astExpression = (ast, depth, opts) => {
     ${opts.abort}
   `;
 
+  const expression = ast.expression.fn
+    ? `${ast.expression.id}(${_state})`
+    : `${_exec}(${_state}, ${ast.expression.id})`;
+
   if (!opts.capture) {
     return js`
-      if (!(${ast.expression})) {
+      if (!${expression}) {
         ${abort}
       }
     `;
   }
 
   return js`
-    if (${_match} = ${ast.expression}) {
+    if (${_match} = ${expression}) {
       ${_node}.push(${_match});
     } else {
       ${abort}
@@ -155,7 +160,7 @@ const astQuantifier = (ast, depth, opts) => {
 };
 
 const astSequence = (ast, depth, opts) => {
-  const alternation = ast.alternation ? `alternation_${depth}` : '';
+  const alternation = ast.alternation ? `alt_${depth}` : '';
 
   let body = '';
   for (; ast; ast = ast.alternation) {

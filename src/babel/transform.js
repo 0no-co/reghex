@@ -158,13 +158,15 @@ export function makeHelpers({ types: t, template }) {
         const binding = path.scope.getBinding(id.name);
         if (binding && t.isVariableDeclarator(binding.path.node)) {
           const matchPath = binding.path.get('init');
-          if (this.isMatch(matchPath)) return `${id.name}(state)`;
+          if (this.isMatch(matchPath)) {
+            return { fn: true, id: id.name };
+          }
         }
 
         const input = t.isStringLiteral(id)
           ? JSON.stringify(id.value)
           : id.name;
-        return `${ids.exec.name}(state, ${input})`;
+        return { fn: false, id: input };
       });
     },
 

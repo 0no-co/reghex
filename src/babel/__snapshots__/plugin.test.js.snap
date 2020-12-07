@@ -96,7 +96,7 @@ const node = function (state) {
 
   var ln2 = node.length;
 
-  alternation_3: {
+  alt_3: {
     block_3: {
       var idx3 = state.index;
 
@@ -108,7 +108,7 @@ const node = function (state) {
         break block_3;
       }
 
-      break alternation_3;
+      break alt_3;
     }
 
     loop_3: for (var j3 = 0; 1; j3++) {
@@ -182,7 +182,7 @@ const node = function (state) {
   var node = [];
   var x;
 
-  alternation_2: {
+  alt_2: {
     block_2: {
       var idx2 = state.index;
 
@@ -202,7 +202,7 @@ const node = function (state) {
         }
       }
 
-      break alternation_2;
+      break alt_2;
     }
 
     loop_2: for (var j2 = 0; 1; j2++) {
