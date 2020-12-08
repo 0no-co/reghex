@@ -1,4 +1,5 @@
-export const _exec = '_exec';
+export const _private = '__private';
+
 const _state = 'state';
 const _node = 'node';
 const _match = 'x';
@@ -32,7 +33,7 @@ const astExpression = (ast, depth, opts) => {
     '';
   const expression = ast.expression.fn
     ? `${ast.expression.id}(${_state})`
-    : `${_exec}(${_state}, ${ast.expression.id})`;
+    : `${_private}.exec(${_state}, ${ast.expression.id})`;
 
   return js`
     if (${_match} = ${expression}) {

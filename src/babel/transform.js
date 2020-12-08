@@ -1,14 +1,17 @@
+import { astRoot, _private } from '../codegen';
 import { parse } from '../parser';
-import { astRoot } from '../codegen';
-import { SharedIds } from './sharedIds';
 
 export function makeHelpers({ types: t, template }) {
   const regexPatternsRe = /^[()\[\]|.+?*]|[^\\][()\[\]|.+?*$^]|\\[wdsWDS]/;
   const importSourceRe = /reghex$|^reghex\/macro/;
   const importName = 'reghex';
-  const ids = new SharedIds(t);
 
   let _hasUpdatedImport = false;
+  let _matchId = t.identifier('match');
+  let _privateId = t.identifier(_private);
+
+  const privateMethod = (name) =>
+    t.memberExpression(t.identifier(_privateId.name), t.identifier(name));
 
   return {
     /** Adds the reghex import declaration to the Program scope */
@@ -21,30 +24,21 @@ export function makeHelpers({ types: t, template }) {
         path.node.source = t.stringLiteral(importName);
       }
 
-      path.node.specifiers.push(
-        t.importSpecifier(
-          (ids.execId = path.scope.generateUidIdentifier('exec')),
-          t.identifier('_exec')
-        ),
-        t.importSpecifier(
-          (ids.patternId = path.scope.generateUidIdentifier('pattern')),
-          t.identifier('_pattern')
-        )
-      );
+      path.node.specifiers.push(t.importSpecifier(_privateId, _privateId));
 
       const tagImport = path.node.specifiers.find((node) => {
-        return t.isImportSpecifier(node) && node.imported.name === 'tag';
+        return t.isImportSpecifier(node) && node.imported.name === 'match';
       });
 
       if (!tagImport) {
         path.node.specifiers.push(
           t.importSpecifier(
-            (ids.tagId = path.scope.generateUidIdentifier('tag')),
-            t.identifier('tag')
+            (_matchId = path.scope.generateUidIdentifier('match')),
+            t.identifier('match')
           )
         );
       } else {
-        ids.tagId = tagImport.imported;
+        _matchId = tagImport.imported;
       }
     },
 
@@ -140,7 +134,7 @@ export function makeHelpers({ types: t, template }) {
           variableDeclarators.push(
             t.variableDeclarator(
               id,
-              t.callExpression(ids.pattern, [expression])
+              t.callExpression(privateMethod('pattern'), [expression])
             )
           );
 
