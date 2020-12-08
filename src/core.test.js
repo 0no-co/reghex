@@ -1,17 +1,17 @@
 import { match } from './core';
 
 const expectToParse = (node, input, result, lastIndex = 0) => {
-  const state = { input, index: 0 };
+  const state = { quasis: [input], expressions: [], x: 0, y: 0 };
   if (result) result.tag = 'node';
   expect(node(state)).toEqual(result);
 
   // NOTE: After parsing we expect the current index to exactly match the
   // sum amount of matched characters
   if (result === undefined) {
-    expect(state.index).toBe(0);
+    expect(state.y).toBe(0);
   } else {
     const index = lastIndex || result.reduce((acc, x) => acc + x.length, 0);
-    expect(state.index).toBe(index);
+    expect(state.y).toBe(index);
   }
 };
 

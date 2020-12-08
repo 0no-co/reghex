@@ -19,36 +19,54 @@ export const _exec = (state, pattern) => {
     return pattern(state);
   }
 
-  pattern.lastIndex = state.index;
-
-  if (isStickySupported) {
-    if (pattern.test(state.input))
-      match = state.input.slice(state.index, pattern.lastIndex);
-  } else {
-    match = pattern.exec(state.input)[0] || match;
+  const input = state.quasis[state.x];
+  if (input && (pattern.lastIndex = state.y) < input.length) {
+    if (isStickySupported) {
+      if (pattern.test(input)) match = input.slice(state.y, pattern.lastIndex);
+    } else {
+      match = pattern.exec(input)[0] || match;
+    }
   }
 
-  state.index = pattern.lastIndex;
+  state.y = pattern.lastIndex;
   return match;
 };
 
-export const parse = (pattern) => (input) => {
-  const state = { input, index: 0 };
+export const interpolation = (state) => {
+  let match;
+
+  const input = state.quasis[state.x];
+  if (!input || state.y >= input.length) {
+    state.y = 0;
+    match = state.expressions[state.x++] || match;
+  }
+
+  return match;
+};
+
+export const parse = (pattern) => (quasis, ...expressions) => {
+  if (typeof quasis === 'string') quasis = [quasis];
+  const state = { quasis, expressions, x: 0, y: 0 };
   return pattern(state);
 };
 
 export const match = (name, transform) => (quasis, ...expressions) => {
+  let interpolations = 0;
+
   const ast = parseDSL(
     quasis,
-    expressions.map((expression, i) => ({
-      fn: typeof expression === 'function' && expression.length,
-      id: `_${i}`,
-    }))
+    expressions.map((expression, i) => {
+      if (expression === interpolation) interpolations++;
+      return {
+        fn: typeof expression === 'function' && expression.length,
+        id: `_${i}`,
+      };
+    })
   );
 
   const makeMatcher = new Function(
     execId + ',_n,_t,' + expressions.map((_expression, i) => `_${i}`).join(','),
-    'return ' + astRoot(ast, '_n', transform ? '_t' : null)
+    'return ' + astRoot(ast, '_n', transform ? '_t' : null, interpolations)
   );
 
   return makeMatcher(_exec, name, transform, ...expressions.map(_pattern));

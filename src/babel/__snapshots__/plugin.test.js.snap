@@ -9,21 +9,21 @@ var _node_expression = (0, _reghex._pattern)(1),
     _node_expression2 = (0, _reghex._pattern)(2);
 
 const node = function (state) {
-  var idx1 = state.index;
+  var y1 = state.y;
   var node = [];
   var x;
 
   if (x = (0, _reghex._exec)(state, _node_expression)) {
     node.push(x);
   } else {
-    state.index = idx1;
+    state.y = y1;
     return;
   }
 
   if (x = (0, _reghex._exec)(state, _node_expression2)) {
     node.push(x);
   } else {
-    state.index = idx1;
+    state.y = y1;
     return;
   }
 
@@ -43,14 +43,14 @@ exports[`works with local recursion 1`] = `
 var _inner_expression = _pattern(/inner/);
 
 const inner = function (state) {
-  var idx1 = state.index;
+  var y1 = state.y;
   var node = [];
   var x;
 
   if (x = _exec(state, _inner_expression)) {
     node.push(x);
   } else {
-    state.index = idx1;
+    state.y = y1;
     return;
   }
 
@@ -59,14 +59,14 @@ const inner = function (state) {
 };
 
 const node = function (state) {
-  var idx1 = state.index;
+  var y1 = state.y;
   var node = [];
   var x;
 
   if (x = inner(state)) {
     node.push(x);
   } else {
-    state.index = idx1;
+    state.y = y1;
     return;
   }
 
@@ -83,14 +83,14 @@ var _node_expression = _pattern(1),
     _node_expression3 = _pattern(3);
 
 const node = function (state) {
-  var idx1 = state.index;
+  var y1 = state.y;
   var node = [];
   var x;
 
   if (x = _exec(state, _node_expression)) {
     node.push(x);
   } else {
-    state.index = idx1;
+    state.y = y1;
     return;
   }
 
@@ -98,12 +98,12 @@ const node = function (state) {
 
   alt_3: {
     block_3: {
-      var idx3 = state.index;
+      var y3 = state.y;
 
       if (x = _exec(state, _node_expression2)) {
         node.push(x);
       } else {
-        state.index = idx3;
+        state.y = y3;
         node.length = ln2;
         break block_3;
       }
@@ -112,15 +112,15 @@ const node = function (state) {
     }
 
     loop_3: for (var j3 = 0; 1; j3++) {
-      var idx3 = state.index;
+      var y3 = state.y;
 
       if (!_exec(state, _node_expression3)) {
         if (j3) {
-          state.index = idx3;
+          state.y = y3;
           break loop_3;
         } else {}
 
-        state.index = idx1;
+        state.y = y1;
         node.length = ln2;
         return;
       }
@@ -136,14 +136,14 @@ exports[`works with self-referential thunks 1`] = `
 "import { match, tag, _exec, _pattern } from 'reghex';
 
 const inner = function (state) {
-  var idx1 = state.index;
+  var y1 = state.y;
   var node = [];
   var x;
 
   if (x = node(state)) {
     node.push(x);
   } else {
-    state.index = idx1;
+    state.y = y1;
     return;
   }
 
@@ -152,14 +152,14 @@ const inner = function (state) {
 };
 
 const node = function (state) {
-  var idx1 = state.index;
+  var y1 = state.y;
   var node = [];
   var x;
 
   if (x = inner(state)) {
     node.push(x);
   } else {
-    state.index = idx1;
+    state.y = y1;
     return;
   }
 
@@ -178,26 +178,26 @@ var _node_expression = _pattern(1),
     _node_expression5 = _pattern(5);
 
 const node = function (state) {
-  var idx1 = state.index;
+  var y1 = state.y;
   var node = [];
   var x;
 
   alt_2: {
     block_2: {
-      var idx2 = state.index;
+      var y2 = state.y;
 
       loop_2: for (var j2 = 0; 1; j2++) {
-        var idx2 = state.index;
+        var y2 = state.y;
 
         if (x = _exec(state, _node_expression)) {
           node.push(x);
         } else {
           if (j2) {
-            state.index = idx2;
+            state.y = y2;
             break loop_2;
           } else {}
 
-          state.index = idx2;
+          state.y = y2;
           break block_2;
         }
       }
@@ -206,45 +206,45 @@ const node = function (state) {
     }
 
     loop_2: for (var j2 = 0; 1; j2++) {
-      var idx2 = state.index;
+      var y2 = state.y;
 
       if (x = _exec(state, _node_expression2)) {
         node.push(x);
       } else {
         if (j2) {
-          state.index = idx2;
+          state.y = y2;
           break loop_2;
         } else {}
 
-        state.index = idx1;
+        state.y = y1;
         return;
       }
     }
 
     loop_2: for (;;) {
-      var idx2 = state.index;
+      var y2 = state.y;
       var ln2 = node.length;
 
       if (x = _exec(state, _node_expression3)) {
         node.push(x);
       } else {
-        state.index = idx2;
+        state.y = y2;
         node.length = ln2;
         break loop_2;
       }
 
-      var idx4 = state.index;
+      var y4 = state.y;
 
       if (x = _exec(state, _node_expression4)) {
         node.push(x);
       } else {
-        state.index = idx4;
+        state.y = y4;
       }
 
       if (x = _exec(state, _node_expression5)) {
         node.push(x);
       } else {
-        state.index = idx2;
+        state.y = y2;
         node.length = ln2;
         break loop_2;
       }
@@ -262,7 +262,7 @@ exports[`works with transform functions 1`] = `
 var _inner_transform = x => x;
 
 const first = function (state) {
-  var idx1 = state.index;
+  var y1 = state.y;
   var node = [];
   var x;
   node.tag = 'inner';
@@ -272,7 +272,7 @@ const first = function (state) {
 const transform = x => x;
 
 const second = function (state) {
-  var idx1 = state.index;
+  var y1 = state.y;
   var node = [];
   var x;
   node.tag = 'node';

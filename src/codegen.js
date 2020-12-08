@@ -3,6 +3,8 @@ const _state = 'state';
 const _node = 'node';
 const _match = 'x';
 
+let _interpolations = 0;
+
 function js(/* arguments */) {
   let body = arguments[0][0];
   for (let i = 1; i < arguments.length; i++)
@@ -17,19 +19,12 @@ const copy = (prev) => {
 };
 
 const assignIndex = (depth) =>
-  depth ? js`var idx${depth} = ${_state}.index;` : '';
+  js`var y${depth} = ${_state}.y` +
+  (_interpolations ? js`, var x${depth} = ${_state}.x;` : ';');
 
 const restoreIndex = (depth) =>
-  depth ? js`${_state}.index = idx${depth};` : '';
-
-const abortOnCondition = (condition, hooks) => js`
-  if (${condition}) {
-    ${restoreIndex(opts.index)}
-    ${opts.abort}
-  } else {
-    ${opts.onAbort}
-  }
-`;
+  js`${_state}.y = y${depth}` +
+  (_interpolations ? js`, ${_state}.x = x${depth};` : ';');
 
 const astExpression = (ast, depth, opts) => {
   const restoreLength =
@@ -200,23 +195,28 @@ const astSequence = (ast, depth, opts) => {
   `;
 };
 
-const astRoot = (ast, name, transform) => js`
-  (function (${_state}) {
-    ${assignIndex(1)}
-    var ${_node} = [];
-    var ${_match};
+const astRoot = (ast, name, transform, interpolations) => {
+  _interpolations = interpolations;
 
-    ${astSequence(ast, 2, {
-      index: 1,
-      length: 0,
-      onAbort: '',
-      abort: js`return;`,
-      capture: true,
-    })}
+  return js`
+    (function (${_state}) {
+      ${assignIndex(1)}
+      var ${_node} = [];
+      var ${_match};
 
-    ${_node}.tag = ${name};
-    return ${transform ? js`(${transform})(${_node})` : _node};
-  })
-`;
+      ${astSequence(ast, 2, {
+        interpolations,
+        index: 1,
+        length: 0,
+        onAbort: '',
+        abort: js`return;`,
+        capture: true,
+      })}
+
+      ${_node}.tag = ${name};
+      return ${transform ? js`(${transform})(${_node})` : _node};
+    })
+  `;
+};
 
 export { astRoot };
