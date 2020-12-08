@@ -556,15 +556,20 @@ describe('negative lookahead group with plus group and required matcher', () => 
 describe('interpolation parsing', () => {
   const node = match('node')`
     ${/1/}
-    ${interpolation}
+    ${interpolation((x) => x > 1 && x)}
     ${/3/}
   `;
 
-  const expected = ['1', 2, '3'];
-  expected.tag = 'node';
+  it('matches interpolations', () => {
+    const expected = ['1', 2, '3'];
+    expected.tag = 'node';
+    expect(parse(node)`1${2}3`).toEqual(expected);
+  });
 
-  expect(parse(node)`1${2}3`).toEqual(expected);
-  expect(parse(node)`13`).toBe(undefined);
-  expect(parse(node)`13${2}`).toBe(undefined);
-  expect(parse(node)`${2}13`).toBe(undefined);
+  it('does not match invalid inputs', () => {
+    expect(parse(node)`13`).toBe(undefined);
+    expect(parse(node)`13${2}`).toBe(undefined);
+    expect(parse(node)`${2}13`).toBe(undefined);
+    expect(parse(node)`1${1}3`).toBe(undefined);
+  });
 });

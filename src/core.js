@@ -33,13 +33,16 @@ export const _exec = (state, pattern) => {
   return match;
 };
 
-export const interpolation = (state) => {
+export const interpolation = (predicate) => (state) => {
   let match;
 
-  const input = state.quasis[state.x];
-  if (!input || state.y >= input.length) {
+  if (
+    state.y >= state.quasis[state.x].length &&
+    state.x < state.expressions.length
+  ) {
     state.y = 0;
-    match = state.expressions[state.x++] || match;
+    match = state.expressions[state.x++];
+    if (predicate && match) match = predicate(match);
   }
 
   return match;
