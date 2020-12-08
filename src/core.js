@@ -26,9 +26,10 @@ export const _exec = (state, pattern) => {
     } else {
       match = pattern.exec(input)[0] || match;
     }
+
+    state.y = pattern.lastIndex;
   }
 
-  state.y = pattern.lastIndex;
   return match;
 };
 
@@ -51,22 +52,17 @@ export const parse = (pattern) => (quasis, ...expressions) => {
 };
 
 export const match = (name, transform) => (quasis, ...expressions) => {
-  let interpolations = 0;
-
   const ast = parseDSL(
     quasis,
-    expressions.map((expression, i) => {
-      if (expression === interpolation) interpolations++;
-      return {
-        fn: typeof expression === 'function' && expression.length,
-        id: `_${i}`,
-      };
-    })
+    expressions.map((expression, i) => ({
+      fn: typeof expression === 'function' && expression.length,
+      id: `_${i}`,
+    }))
   );
 
   const makeMatcher = new Function(
     execId + ',_n,_t,' + expressions.map((_expression, i) => `_${i}`).join(','),
-    'return ' + astRoot(ast, '_n', transform ? '_t' : null, interpolations)
+    'return ' + astRoot(ast, '_n', transform ? '_t' : null)
   );
 
   return makeMatcher(_exec, name, transform, ...expressions.map(_pattern));

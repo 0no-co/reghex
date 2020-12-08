@@ -3,8 +3,6 @@ const _state = 'state';
 const _node = 'node';
 const _match = 'x';
 
-let _interpolations = 0;
-
 function js(/* arguments */) {
   let body = arguments[0][0];
   for (let i = 1; i < arguments.length; i++)
@@ -18,13 +16,15 @@ const copy = (prev) => {
   return next;
 };
 
-const assignIndex = (depth) =>
-  js`var y${depth} = ${_state}.y` +
-  (_interpolations ? js`, x${depth} = ${_state}.x;` : ';');
+const assignIndex = (depth) => js`
+  var y${depth} = ${_state}.y,
+      x${depth} = ${_state}.x;
+`;
 
-const restoreIndex = (depth) =>
-  js`${_state}.y = y${depth}` +
-  (_interpolations ? js`, ${_state}.x = x${depth};` : ';');
+const restoreIndex = (depth) => js`
+  ${_state}.y = y${depth};
+  ${_state}.x = x${depth};
+`;
 
 const astExpression = (ast, depth, opts) => {
   const restoreLength =
@@ -181,9 +181,7 @@ const astSequence = (ast, depth, opts) => {
   `;
 };
 
-const astRoot = (ast, name, transform, interpolations) => {
-  _interpolations = interpolations;
-
+const astRoot = (ast, name, transform) => {
   return js`
     (function (${_state}) {
       ${assignIndex(1)}
@@ -191,7 +189,6 @@ const astRoot = (ast, name, transform, interpolations) => {
       var ${_match};
 
       ${astSequence(ast, 2, {
-        interpolations,
         index: 1,
         length: 0,
         onAbort: '',
