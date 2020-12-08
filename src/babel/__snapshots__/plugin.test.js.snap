@@ -114,7 +114,7 @@ const node = function (state) {
     loop_3: for (var j3 = 0; 1; j3++) {
       var y3 = state.y;
 
-      if (!_exec(state, _node_expression3)) {
+      if (x = _exec(state, _node_expression3)) {} else {
         if (j3) {
           state.y = y3;
           break loop_3;

@@ -30,31 +30,18 @@ const astExpression = (ast, depth, opts) => {
   const restoreLength =
     (opts.length && opts.abort && js`${_node}.length = ln${opts.length};`) ||
     '';
-
-  const abort = js`
-    ${opts.onAbort}
-    ${restoreIndex(opts.index)}
-    ${restoreLength}
-    ${opts.abort}
-  `;
-
   const expression = ast.expression.fn
     ? `${ast.expression.id}(${_state})`
     : `${_exec}(${_state}, ${ast.expression.id})`;
 
-  if (!opts.capture) {
-    return js`
-      if (!${expression}) {
-        ${abort}
-      }
-    `;
-  }
-
   return js`
     if (${_match} = ${expression}) {
-      ${_node}.push(${_match});
+      ${opts.capture ? js`${_node}.push(${_match})` : ''}
     } else {
-      ${abort}
+      ${opts.onAbort}
+      ${restoreIndex(opts.index)}
+      ${restoreLength}
+      ${opts.abort}
     }
   `;
 };
