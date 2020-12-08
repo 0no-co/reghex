@@ -1,4 +1,4 @@
-import { match } from './core';
+import { parse, match, interpolation } from './core';
 
 const expectToParse = (node, input, result, lastIndex = 0) => {
   const state = { quasis: [input], expressions: [], x: 0, y: 0 };
@@ -551,4 +551,20 @@ describe('negative lookahead group with plus group and required matcher', () => 
       expectToParse(node, input, result, lastIndex);
     }
   );
+});
+
+describe('interpolation parsing', () => {
+  const node = match('node')`
+    ${/1/}
+    ${interpolation}
+    ${/3/}
+  `;
+
+  const expected = ['1', 2, '3'];
+  expected.tag = 'node';
+
+  expect(parse(node)`1${2}3`).toEqual(expected);
+  expect(parse(node)`13`).toBe(undefined);
+  expect(parse(node)`13${2}`).toBe(undefined);
+  expect(parse(node)`${2}13`).toBe(undefined);
 });

@@ -20,7 +20,7 @@ const copy = (prev) => {
 
 const assignIndex = (depth) =>
   js`var y${depth} = ${_state}.y` +
-  (_interpolations ? js`, var x${depth} = ${_state}.x;` : ';');
+  (_interpolations ? js`, x${depth} = ${_state}.x;` : ';');
 
 const restoreIndex = (depth) =>
   js`${_state}.y = y${depth}` +
@@ -52,7 +52,6 @@ const astGroup = (ast, depth, opts) => {
   opts = copy(opts);
   opts.capture = capture;
 
-  let group = '';
   if (!opts.length && capture) {
     opts.length = depth;
     return js`
