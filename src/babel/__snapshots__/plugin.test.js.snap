@@ -1,5 +1,48 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`deduplicates hoisted expressions 1`] = `
+"import { match, __private } from \\"reghex\\";
+const re = /1/;
+
+var _re_expression = __private.pattern(re);
+
+const a = function (state) {
+  var y1 = state.y,
+      x1 = state.x;
+  var node = [];
+  var x;
+
+  if (x = __private.exec(state, _re_expression)) {
+    node.push(x);
+  } else {
+    state.y = y1;
+    state.x = x1;
+    return;
+  }
+
+  node.tag = 'a';
+  return node;
+};
+
+const b = function (state) {
+  var y1 = state.y,
+      x1 = state.x;
+  var node = [];
+  var x;
+
+  if (x = __private.exec(state, _re_expression)) {
+    node.push(x);
+  } else {
+    state.y = y1;
+    state.x = x1;
+    return;
+  }
+
+  node.tag = 'b';
+  return node;
+};"
+`;
+
 exports[`works together with @babel/plugin-transform-modules-commonjs 1`] = `
 "\\"use strict\\";
 

@@ -10,6 +10,8 @@ export function makeHelpers({ types: t, template }) {
   let _matchId = t.identifier('match');
   let _privateId = t.identifier(_private);
 
+  const _hoistedExpressions = new Map();
+
   const privateMethod = (name) =>
     t.memberExpression(t.identifier(_privateId.name), t.identifier(name));
 
@@ -116,19 +118,25 @@ export function makeHelpers({ types: t, template }) {
             expression = expression.body.body[0].argument;
           }
 
-          if (
+          const isBindingExpression =
             t.isIdentifier(expression) &&
-            path.scope.hasBinding(expression.name)
-          ) {
+            path.scope.hasBinding(expression.name);
+          if (isBindingExpression) {
             const binding = path.scope.getBinding(expression.name);
             if (t.isVariableDeclarator(binding.path.node)) {
               const matchPath = binding.path.get('init');
-              if (this.isMatch(matchPath)) return expression;
+              if (this.isMatch(matchPath)) {
+                return expression;
+              } else if (_hoistedExpressions.has(expression.name)) {
+                return t.identifier(_hoistedExpressions.get(expression.name));
+              }
             }
           }
 
           const id = path.scope.generateUidIdentifier(
-            `${matchName}_expression`
+            isBindingExpression
+              ? `${expression.name}_expression`
+              : `${matchName}_expression`
           );
 
           variableDeclarators.push(
@@ -138,6 +146,9 @@ export function makeHelpers({ types: t, template }) {
             )
           );
 
+          if (t.isIdentifier(expression)) {
+            _hoistedExpressions.set(expression.name, id.name);
+          }
           return id;
         }
       );

@@ -34,6 +34,27 @@ it('works while only minifying', () => {
   ).toMatchSnapshot();
 });
 
+it('deduplicates hoisted expressions', () => {
+  const code = `
+    import { match } from 'reghex/macro';
+
+    const re = /1/;
+
+    const a = match('a')\`
+      \${re}
+    \`;
+
+    const b = match('b')\`
+      \${re}
+    \`;
+  `;
+
+  expect(
+    transform(code, { babelrc: false, presets: [], plugins: [reghexPlugin] })
+      .code
+  ).toMatchSnapshot();
+});
+
 it('works with local recursion', () => {
   // NOTE: A different default name is allowed
   const code = `
