@@ -66,6 +66,10 @@ export default [
   },
   {
     ...base,
+    output: {
+      ...output('cjs', '.js'),
+      exports: 'default',
+    },
     input: {
       babel: './src/babel/plugin.js',
       macro: './src/babel/macro.js',
