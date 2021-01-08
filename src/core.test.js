@@ -1,17 +1,17 @@
-import { match } from './core';
+import { parse, match, interpolation } from './core';
 
 const expectToParse = (node, input, result, lastIndex = 0) => {
-  const state = { input, index: 0 };
+  const state = { quasis: [input], expressions: [], x: 0, y: 0 };
   if (result) result.tag = 'node';
   expect(node(state)).toEqual(result);
 
   // NOTE: After parsing we expect the current index to exactly match the
   // sum amount of matched characters
   if (result === undefined) {
-    expect(state.index).toBe(0);
+    expect(state.y).toBe(0);
   } else {
     const index = lastIndex || result.reduce((acc, x) => acc + x.length, 0);
-    expect(state.index).toBe(index);
+    expect(state.y).toBe(index);
   }
 };
 
@@ -551,4 +551,25 @@ describe('negative lookahead group with plus group and required matcher', () => 
       expectToParse(node, input, result, lastIndex);
     }
   );
+});
+
+describe('interpolation parsing', () => {
+  const node = match('node')`
+    ${/1/}
+    ${interpolation((x) => x > 1 && x)}
+    ${/3/}
+  `;
+
+  it('matches interpolations', () => {
+    const expected = ['1', 2, '3'];
+    expected.tag = 'node';
+    expect(parse(node)`1${2}3`).toEqual(expected);
+  });
+
+  it('does not match invalid inputs', () => {
+    expect(parse(node)`13`).toBe(undefined);
+    expect(parse(node)`13${2}`).toBe(undefined);
+    expect(parse(node)`${2}13`).toBe(undefined);
+    expect(parse(node)`1${1}3`).toBe(undefined);
+  });
 });

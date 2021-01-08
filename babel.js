@@ -1,1 +1,1 @@
-module.exports = require('./dist/reghex-babel.js').default;
+module.exports = require('./dist/reghex-babel.js');

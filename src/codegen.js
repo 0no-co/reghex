@@ -1,4 +1,5 @@
-export const _exec = '_exec';
+export const _private = '__private';
+
 const _state = 'state';
 const _node = 'node';
 const _match = 'x';
@@ -16,50 +17,32 @@ const copy = (prev) => {
   return next;
 };
 
-const assignIndex = (depth) =>
-  depth ? js`var idx${depth} = ${_state}.index;` : '';
+const assignIndex = (depth) => js`
+  var y${depth} = ${_state}.y,
+      x${depth} = ${_state}.x;
+`;
 
-const restoreIndex = (depth) =>
-  depth ? js`${_state}.index = idx${depth};` : '';
-
-const abortOnCondition = (condition, hooks) => js`
-  if (${condition}) {
-    ${restoreIndex(opts.index)}
-    ${opts.abort}
-  } else {
-    ${opts.onAbort}
-  }
+const restoreIndex = (depth) => js`
+  ${_state}.y = y${depth};
+  ${_state}.x = x${depth};
 `;
 
 const astExpression = (ast, depth, opts) => {
   const restoreLength =
     (opts.length && opts.abort && js`${_node}.length = ln${opts.length};`) ||
     '';
-
-  const abort = js`
-    ${opts.onAbort}
-    ${restoreIndex(opts.index)}
-    ${restoreLength}
-    ${opts.abort}
-  `;
-
   const expression = ast.expression.fn
     ? `${ast.expression.id}(${_state})`
-    : `${_exec}(${_state}, ${ast.expression.id})`;
-
-  if (!opts.capture) {
-    return js`
-      if (!${expression}) {
-        ${abort}
-      }
-    `;
-  }
+    : `${_private}.exec(${_state}, ${ast.expression.id})`;
 
   return js`
     if (${_match} = ${expression}) {
-      ${_node}.push(${_match});
+      ${opts.capture ? js`${_node}.push(${_match})` : ''}
     } else {
-      ${abort}
+      ${opts.onAbort}
+      ${restoreIndex(opts.index)}
+      ${restoreLength}
+      ${opts.abort}
     }
   `;
 };
@@ -70,7 +53,6 @@ const astGroup = (ast, depth, opts) => {
   opts = copy(opts);
   opts.capture = capture;
 
-  let group = '';
   if (!opts.length && capture) {
     opts.length = depth;
     return js`
@@ -200,23 +182,25 @@ const astSequence = (ast, depth, opts) => {
   `;
 };
 
-const astRoot = (ast, name, transform) => js`
-  (function (${_state}) {
-    ${assignIndex(1)}
-    var ${_node} = [];
-    var ${_match};
+const astRoot = (ast, name, transform) => {
+  return js`
+    (function (${_state}) {
+      ${assignIndex(1)}
+      var ${_node} = [];
+      var ${_match};
 
-    ${astSequence(ast, 2, {
-      index: 1,
-      length: 0,
-      onAbort: '',
-      abort: js`return;`,
-      capture: true,
-    })}
+      ${astSequence(ast, 2, {
+        index: 1,
+        length: 0,
+        onAbort: '',
+        abort: js`return;`,
+        capture: true,
+      })}
 
-    ${_node}.tag = ${name};
-    return ${transform ? js`(${transform})(${_node})` : _node};
-  })
-`;
+      ${_node}.tag = ${name};
+      return ${transform ? js`(${transform})(${_node})` : _node};
+    })
+  `;
+};
 
 export { astRoot };

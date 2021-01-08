@@ -22,11 +22,9 @@
       "require": "./dist/reghex-core.js"
     },
     "./babel": {
-      "import": "./dist/reghex-babel.mjs",
       "require": "./dist/reghex-babel.js"
     },
     "./macro": {
-      "import": "./dist/reghex-macro.mjs",
       "require": "./dist/reghex-macro.js"
     },
     "./package.json": "./package.json"
