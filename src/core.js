@@ -38,7 +38,8 @@ export const __private = {
           if (pattern.test(input))
             match = input.slice(state.y, pattern.lastIndex);
         } else {
-          match = pattern.exec(input)[0] || match;
+          const x = pattern.exec(input);
+          match = x[1] == null ? x[0] : match;
         }
 
         state.y = pattern.lastIndex;
