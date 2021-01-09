@@ -1,5 +1,3 @@
-export const _private = '__private';
-
 const _state = 'state';
 const _node = 'node';
 const _match = 'x';
@@ -31,12 +29,9 @@ const astExpression = (ast, depth, opts) => {
   const restoreLength =
     (opts.length && opts.abort && js`${_node}.length = ln${opts.length};`) ||
     '';
-  const expression = ast.expression.fn
-    ? `${ast.expression.id}(${_state})`
-    : `${_private}.exec(${_state}, ${ast.expression.id})`;
-
+  const expression = `${ast.expression.id}(${_state})`;
   return js`
-    if ((${_match} = ${expression}) != null) {
+    if ((${_match} = ${ast.expression.id}(${_state})) != null) {
       ${opts.capture ? js`${_node}.push(${_match})` : ''}
     } else {
       ${opts.onAbort}

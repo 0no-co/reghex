@@ -1,53 +1,56 @@
-import { astRoot, _private as privateId } from './codegen';
+import { astRoot } from './codegen';
 import { parse as parseDSL } from './parser';
 
 const isStickySupported = typeof /./g.sticky === 'boolean';
 
-export const __private = {
-  pattern(input) {
-    if (typeof input === 'function' || typeof input === 'string') {
-      return input;
+const execLambda = (pattern) => {
+  if (pattern.length) return pattern;
+  return (state) => pattern()(state);
+};
+
+const execString = (pattern) => (state) => {
+  const input = state.quasis[state.x];
+  if (input && state.y < input.length) {
+    const sub = input.slice(state.y, state.y + pattern.length);
+    if (sub === pattern) {
+      state.y += pattern.length;
+      return sub;
     }
+  }
+};
 
-    const source = typeof input !== 'string' ? input.source : input;
-    return isStickySupported
-      ? new RegExp(source, 'y')
-      : new RegExp(source + '|()', 'g');
-  },
-
-  exec(state, pattern) {
-    let match;
-
-    if (typeof pattern === 'function') {
-      if (!pattern.length) pattern = pattern();
-      return pattern(state);
-    }
-
+const execRegex = (pattern) => {
+  pattern = isStickySupported
+    ? new RegExp(pattern.source, 'y')
+    : new RegExp(pattern.source + '|()', 'g');
+  return (state) => {
     const input = state.quasis[state.x];
     if (input && state.y < input.length) {
-      if (typeof pattern === 'string') {
-        const end = state.y + pattern.length;
-        const sub = input.slice(state.y, end);
-        if (sub === pattern) {
-          state.y = end;
-          match = sub;
-        }
+      pattern.lastIndex = state.y;
+
+      let match;
+      if (isStickySupported) {
+        if (pattern.test(input))
+          match = input.slice(state.y, pattern.lastIndex);
       } else {
-        pattern.lastIndex = state.y;
-        if (isStickySupported) {
-          if (pattern.test(input))
-            match = input.slice(state.y, pattern.lastIndex);
-        } else {
-          const x = pattern.exec(input);
-          match = x[1] == null ? x[0] : match;
-        }
-
-        state.y = pattern.lastIndex;
+        const x = pattern.exec(input);
+        if (x[1] == null) match = x[0];
       }
-    }
 
-    return match;
-  },
+      state.y = pattern.lastIndex;
+      return match;
+    }
+  };
+};
+
+export const __pattern = (input) => {
+  if (typeof input === 'function') {
+    return execLambda(input);
+  } else if (typeof input === 'string') {
+    return execString(input);
+  } else {
+    return execRegex(input);
+  }
 };
 
 export const interpolation = (predicate) => (state) => {
@@ -74,23 +77,10 @@ export const parse = (matcher) => (quasis, ...expressions) => {
 export const match = (name, transform) => (quasis, ...expressions) => {
   const ast = parseDSL(
     quasis,
-    expressions.map((expression, i) => ({
-      fn: typeof expression === 'function' && expression.length,
-      id: `_${i}`,
-    }))
+    expressions.map((_, i) => ({ id: `_${i}` }))
   );
-
-  const makeMatcher = new Function(
-    privateId +
-      ',_n,_t,' +
-      expressions.map((_expression, i) => `_${i}`).join(','),
+  return new Function(
+    '_n,_t,' + expressions.map((_expression, i) => `_${i}`).join(','),
     'return ' + astRoot(ast, '_n', transform ? '_t' : null)
-  );
-
-  return makeMatcher(
-    __private,
-    name,
-    transform,
-    ...expressions.map(__private.pattern)
-  );
+  )(name, transform, ...expressions.map(__pattern));
 };

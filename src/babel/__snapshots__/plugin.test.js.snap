@@ -1,11 +1,12 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`deduplicates hoisted expressions 1`] = `
-"import { match, __private } from \\"reghex\\";
+"import { match, __pattern as _pattern } from \\"reghex\\";
 const re = /1/;
 const str = '1';
 
-var _re_expression = __private.pattern(re);
+var _re_expression = _pattern(re),
+    _str_expression = _pattern(str);
 
 const a = function (state) {
   var y1 = state.y,
@@ -13,7 +14,7 @@ const a = function (state) {
   var node = [];
   var x;
 
-  if ((x = __private.exec(state, _re_expression)) != null) {
+  if ((x = _re_expression(state)) != null) {
     node.push(x);
   } else {
     state.y = y1;
@@ -21,7 +22,7 @@ const a = function (state) {
     return;
   }
 
-  if ((x = __private.exec(state, str)) != null) {
+  if ((x = _str_expression(state)) != null) {
     node.push(x);
   } else {
     state.y = y1;
@@ -33,13 +34,15 @@ const a = function (state) {
   return node;
 };
 
+var _b_expression = _pattern('2');
+
 const b = function (state) {
   var y1 = state.y,
       x1 = state.x;
   var node = [];
   var x;
 
-  if ((x = __private.exec(state, _re_expression)) != null) {
+  if ((x = _re_expression(state)) != null) {
     node.push(x);
   } else {
     state.y = y1;
@@ -47,7 +50,7 @@ const b = function (state) {
     return;
   }
 
-  if ((x = __private.exec(state, \\"2\\")) != null) {
+  if ((x = _b_expression(state)) != null) {
     node.push(x);
   } else {
     state.y = y1;

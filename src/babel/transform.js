@@ -1,4 +1,4 @@
-import { astRoot, _private } from '../codegen';
+import { astRoot } from '../codegen';
 import { parse } from '../parser';
 
 export function makeHelpers({ types: t, template }) {
@@ -8,12 +8,9 @@ export function makeHelpers({ types: t, template }) {
 
   let _hasUpdatedImport = false;
   let _matchId = t.identifier('match');
-  let _privateId = t.identifier(_private);
+  let _patternId = t.identifier('__pattern');
 
   const _hoistedExpressions = new Map();
-
-  const privateMethod = (name) =>
-    t.memberExpression(t.identifier(_privateId.name), t.identifier(name));
 
   return {
     /** Adds the reghex import declaration to the Program scope */
@@ -26,7 +23,10 @@ export function makeHelpers({ types: t, template }) {
         path.node.source = t.stringLiteral(importName);
       }
 
-      path.node.specifiers.push(t.importSpecifier(_privateId, _privateId));
+      _patternId = path.scope.generateUidIdentifier('_pattern');
+      path.node.specifiers.push(
+        t.importSpecifier(_patternId, t.identifier('__pattern'))
+      );
 
       const tagImport = path.node.specifiers.find((node) => {
         return t.isImportSpecifier(node) && node.imported.name === 'match';
@@ -116,8 +116,6 @@ export function makeHelpers({ types: t, template }) {
             t.isIdentifier(expression.body.body[0].argument)
           ) {
             expression = expression.body.body[0].argument;
-          } else if (t.isStringLiteral(expression)) {
-            return expression;
           }
 
           const isBindingExpression =
@@ -128,8 +126,6 @@ export function makeHelpers({ types: t, template }) {
             if (t.isVariableDeclarator(binding.path.node)) {
               const matchPath = binding.path.get('init');
               if (this.isMatch(matchPath)) {
-                return expression;
-              } else if (t.isStringLiteral(matchPath)) {
                 return expression;
               } else if (_hoistedExpressions.has(expression.name)) {
                 return t.identifier(_hoistedExpressions.get(expression.name));
@@ -146,7 +142,7 @@ export function makeHelpers({ types: t, template }) {
           variableDeclarators.push(
             t.variableDeclarator(
               id,
-              t.callExpression(privateMethod('pattern'), [expression])
+              t.callExpression(t.identifier(_patternId.name), [expression])
             )
           );
 
