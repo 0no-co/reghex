@@ -10,8 +10,8 @@ const execLambda = (pattern) => {
 
 const execString = (pattern) => {
   return (state) => {
-    const input = state.quasis[state.x];
-    if (input && state.y < input.length) {
+    if (state.x < state.quasis.length) {
+      const input = state.quasis[state.x];
       for (let i = 0, l = pattern.length; i < l; i++)
         if (input.charCodeAt(state.y + i) !== pattern.charCodeAt(i))
           return null;
@@ -26,10 +26,9 @@ const execRegex = (pattern) => {
     ? new RegExp(pattern.source, 'y')
     : new RegExp(pattern.source + '|()', 'g');
   return (state) => {
-    const input = state.quasis[state.x];
-    if (input && state.y < input.length) {
+    if (state.x < state.quasis.length) {
+      const input = state.quasis[state.x];
       pattern.lastIndex = state.y;
-
       let match;
       if (isStickySupported) {
         if (pattern.test(input))
@@ -59,8 +58,8 @@ export const interpolation = (predicate) => (state) => {
   let match;
 
   if (
-    state.y >= state.quasis[state.x].length &&
-    state.x < state.expressions.length
+    state.x < state.expressions.length &&
+    state.y >= state.quasis[state.x].length
   ) {
     state.y = 0;
     match = state.expressions[state.x++];

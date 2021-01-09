@@ -24,6 +24,11 @@ describe('required matcher', () => {
   `('should return $result when $input is passed', ({ input, result }) => {
     expectToParse(node, input, result);
   });
+
+  it('matches empty regex patterns', () => {
+    const node = match('node')`${/[ ]*/}`;
+    expectToParse(node, '', ['']);
+  });
 });
 
 describe('optional matcher', () => {
