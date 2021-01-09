@@ -8,15 +8,17 @@ const execLambda = (pattern) => {
   return (state) => pattern()(state);
 };
 
-const execString = (pattern) => (state) => {
-  const input = state.quasis[state.x];
-  if (input && state.y < input.length) {
-    const sub = input.slice(state.y, state.y + pattern.length);
-    if (sub === pattern) {
+const execString = (pattern) => {
+  return (state) => {
+    const input = state.quasis[state.x];
+    if (input && state.y < input.length) {
+      for (let i = 0, l = pattern.length; i < l; i++)
+        if (input.charCodeAt(state.y + i) !== pattern.charCodeAt(i))
+          return null;
       state.y += pattern.length;
-      return sub;
+      return pattern;
     }
-  }
+  };
 };
 
 const execRegex = (pattern) => {
