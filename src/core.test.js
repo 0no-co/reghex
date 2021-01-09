@@ -556,7 +556,7 @@ describe('negative lookahead group with plus group and required matcher', () => 
 describe('interpolation parsing', () => {
   const node = match('node')`
     ${/1/}
-    ${interpolation((x) => x > 1 && x)}
+    ${interpolation((x) => (x > 1 ? x : null))}
     ${/3/}
   `;
 

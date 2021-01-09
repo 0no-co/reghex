@@ -36,7 +36,7 @@ const astExpression = (ast, depth, opts) => {
     : `${_private}.exec(${_state}, ${ast.expression.id})`;
 
   return js`
-    if (${_match} = ${expression}) {
+    if ((${_match} = ${expression}) != null) {
       ${opts.capture ? js`${_node}.push(${_match})` : ''}
     } else {
       ${opts.onAbort}

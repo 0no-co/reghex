@@ -13,7 +13,7 @@ const a = function (state) {
   var node = [];
   var x;
 
-  if (x = __private.exec(state, _re_expression)) {
+  if ((x = __private.exec(state, _re_expression)) != null) {
     node.push(x);
   } else {
     state.y = y1;
@@ -21,7 +21,7 @@ const a = function (state) {
     return;
   }
 
-  if (x = __private.exec(state, str)) {
+  if ((x = __private.exec(state, str)) != null) {
     node.push(x);
   } else {
     state.y = y1;
@@ -39,7 +39,7 @@ const b = function (state) {
   var node = [];
   var x;
 
-  if (x = __private.exec(state, _re_expression)) {
+  if ((x = __private.exec(state, _re_expression)) != null) {
     node.push(x);
   } else {
     state.y = y1;
@@ -47,7 +47,7 @@ const b = function (state) {
     return;
   }
 
-  if (x = __private.exec(state, \\"2\\")) {
+  if ((x = __private.exec(state, \\"2\\")) != null) {
     node.push(x);
   } else {
     state.y = y1;
