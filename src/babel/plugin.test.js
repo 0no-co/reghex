@@ -34,7 +34,7 @@ it('works while only minifying', () => {
   ).toMatchSnapshot();
 });
 
-it.only('deduplicates hoisted expressions', () => {
+it('deduplicates hoisted expressions', () => {
   const code = `
     import { match } from 'reghex/macro';
 
