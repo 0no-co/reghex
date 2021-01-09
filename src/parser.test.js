@@ -42,38 +42,85 @@ it('supports groups with quantifiers', () => {
   expect(ast).toHaveProperty('0.sequence.0.quantifier', undefined);
 });
 
-it('supports non-capturing groups', () => {
-  const ast = parseTag`(?: ${1})`;
-  expect(ast).toHaveProperty('length', 1);
-  expect(ast).toHaveProperty('0.capture', ':');
-  expect(ast).toHaveProperty('0.sequence.length', 1);
+describe('non-capturing syntax', () => {
+  it('supports regex-like syntax', () => {
+    const ast = parseTag`(?: ${1})`;
+    expect(ast).toHaveProperty('length', 1);
+    expect(ast).toHaveProperty('0.capture', ':');
+    expect(ast).toHaveProperty('0.sequence.length', 1);
+  });
+
+  it('supports shorthand', () => {
+    let ast = parseTag`:${1}`;
+    expect(ast).toHaveProperty('length', 1);
+    expect(ast).toHaveProperty('0.capture', ':');
+    expect(ast).toHaveProperty('0.expression', 1);
+    ast = parseTag`:(${1})`;
+    expect(ast).toHaveProperty('length', 1);
+    expect(ast).toHaveProperty('0.capture', ':');
+    expect(ast).toHaveProperty('0.sequence.length', 1);
+  });
+
+  it('fails on invalid usage', () => {
+    expect(() => parseTag`${1} : ${2}`).toThrow();
+    expect(() => parseTag`${1} :|${2}`).toThrow();
+  });
 });
 
-it('supports positive lookahead groups', () => {
-  const ast = parseTag`(?= ${1})`;
-  expect(ast).toHaveProperty('length', 1);
-  expect(ast).toHaveProperty('0.capture', '=');
-  expect(ast).toHaveProperty('0.sequence.length', 1);
+describe('positive lookaheads syntax', () => {
+  it('supports regex-like syntax', () => {
+    const ast = parseTag`(?= ${1})`;
+    expect(ast).toHaveProperty('length', 1);
+    expect(ast).toHaveProperty('0.capture', '=');
+    expect(ast).toHaveProperty('0.sequence.length', 1);
+  });
+
+  it('supports shorthand', () => {
+    let ast = parseTag`=${1}`;
+    expect(ast).toHaveProperty('length', 1);
+    expect(ast).toHaveProperty('0.capture', '=');
+    expect(ast).toHaveProperty('0.expression', 1);
+    ast = parseTag`=(${1})`;
+    expect(ast).toHaveProperty('length', 1);
+    expect(ast).toHaveProperty('0.capture', '=');
+    expect(ast).toHaveProperty('0.sequence.length', 1);
+  });
 });
 
-it('supports negative lookahead groups', () => {
-  const ast = parseTag`(?! ${1})`;
-  expect(ast).toHaveProperty('length', 1);
-  expect(ast).toHaveProperty('0.capture', '!');
-  expect(ast).toHaveProperty('0.sequence.length', 1);
+describe('negative lookaheads syntax', () => {
+  it('supports regex-like syntax', () => {
+    const ast = parseTag`(?! ${1})`;
+    expect(ast).toHaveProperty('length', 1);
+    expect(ast).toHaveProperty('0.capture', '!');
+    expect(ast).toHaveProperty('0.sequence.length', 1);
+  });
+
+  it('supports shorthand', () => {
+    let ast = parseTag`!${1}`;
+    expect(ast).toHaveProperty('length', 1);
+    expect(ast).toHaveProperty('0.capture', '!');
+    expect(ast).toHaveProperty('0.expression', 1);
+    ast = parseTag`!(${1})`;
+    expect(ast).toHaveProperty('length', 1);
+    expect(ast).toHaveProperty('0.capture', '!');
+    expect(ast).toHaveProperty('0.sequence.length', 1);
+  });
 });
 
 it('supports groups with alternates', () => {
   expect(parseTag`(${1} | ${2}) ${3}`).toMatchInlineSnapshot(`
     Array [
       Object {
+        "capture": undefined,
         "sequence": Array [
           Object {
+            "capture": undefined,
             "expression": 1,
           },
         ],
       },
       Object {
+        "capture": undefined,
         "expression": 3,
       },
     ]
