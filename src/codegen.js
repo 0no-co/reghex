@@ -26,13 +26,14 @@ const restoreIndex = (depth) => js`
 `;
 
 const astExpression = (ast, depth, opts) => {
+  const capture = !!opts.capture && !ast.capture;
   const restoreLength =
     (opts.length && opts.abort && js`${_node}.length = ln${opts.length};`) ||
     '';
   const expression = `${ast.expression.id}(${_state})`;
   return js`
     if ((${_match} = ${ast.expression.id}(${_state})) != null) {
-      ${opts.capture ? js`${_node}.push(${_match})` : ''}
+      ${capture ? js`${_node}.push(${_match})` : ''}
     } else {
       ${opts.onAbort}
       ${restoreIndex(opts.index)}
