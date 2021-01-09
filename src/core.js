@@ -5,7 +5,10 @@ const isStickySupported = typeof /./g.sticky === 'boolean';
 
 export const __private = {
   pattern(input) {
-    if (typeof input === 'function') return input;
+    if (typeof input === 'function' || typeof input === 'string') {
+      return input;
+    }
+
     const source = typeof input !== 'string' ? input.source : input;
     return isStickySupported
       ? new RegExp(source, 'y')
@@ -21,15 +24,25 @@ export const __private = {
     }
 
     const input = state.quasis[state.x];
-    if (input && (pattern.lastIndex = state.y) < input.length) {
-      if (isStickySupported) {
-        if (pattern.test(input))
-          match = input.slice(state.y, pattern.lastIndex);
+    if (input && state.y < input.length) {
+      if (typeof pattern === 'string') {
+        const end = state.y + pattern.length;
+        const sub = input.slice(state.y, end);
+        if (sub === pattern) {
+          state.y = end;
+          match = sub;
+        }
       } else {
-        match = pattern.exec(input)[0] || match;
-      }
+        pattern.lastIndex = state.y;
+        if (isStickySupported) {
+          if (pattern.test(input))
+            match = input.slice(state.y, pattern.lastIndex);
+        } else {
+          match = pattern.exec(input)[0] || match;
+        }
 
-      state.y = pattern.lastIndex;
+        state.y = pattern.lastIndex;
+      }
     }
 
     return match;

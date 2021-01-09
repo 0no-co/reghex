@@ -116,6 +116,8 @@ export function makeHelpers({ types: t, template }) {
             t.isIdentifier(expression.body.body[0].argument)
           ) {
             expression = expression.body.body[0].argument;
+          } else if (t.isStringLiteral(expression)) {
+            return expression;
           }
 
           const isBindingExpression =
@@ -126,6 +128,8 @@ export function makeHelpers({ types: t, template }) {
             if (t.isVariableDeclarator(binding.path.node)) {
               const matchPath = binding.path.get('init');
               if (this.isMatch(matchPath)) {
+                return expression;
+              } else if (t.isStringLiteral(matchPath)) {
                 return expression;
               } else if (_hoistedExpressions.has(expression.name)) {
                 return t.identifier(_hoistedExpressions.get(expression.name));
@@ -149,6 +153,7 @@ export function makeHelpers({ types: t, template }) {
           if (t.isIdentifier(expression)) {
             _hoistedExpressions.set(expression.name, id.name);
           }
+
           return id;
         }
       );
