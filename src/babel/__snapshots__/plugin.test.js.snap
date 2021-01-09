@@ -3,6 +3,7 @@
 exports[`deduplicates hoisted expressions 1`] = `
 "import { match, __private } from \\"reghex\\";
 const re = /1/;
+const str = '1';
 
 var _re_expression = __private.pattern(re);
 
@@ -13,6 +14,14 @@ const a = function (state) {
   var x;
 
   if (x = __private.exec(state, _re_expression)) {
+    node.push(x);
+  } else {
+    state.y = y1;
+    state.x = x1;
+    return;
+  }
+
+  if (x = __private.exec(state, str)) {
     node.push(x);
   } else {
     state.y = y1;
@@ -31,6 +40,14 @@ const b = function (state) {
   var x;
 
   if (x = __private.exec(state, _re_expression)) {
+    node.push(x);
+  } else {
+    state.y = y1;
+    state.x = x1;
+    return;
+  }
+
+  if (x = __private.exec(state, \\"2\\")) {
     node.push(x);
   } else {
     state.y = y1;

@@ -34,18 +34,21 @@ it('works while only minifying', () => {
   ).toMatchSnapshot();
 });
 
-it('deduplicates hoisted expressions', () => {
+it.only('deduplicates hoisted expressions', () => {
   const code = `
     import { match } from 'reghex/macro';
 
     const re = /1/;
+    const str = '1';
 
     const a = match('a')\`
       \${re}
+      \${str}
     \`;
 
     const b = match('b')\`
       \${re}
+      \${'2'}
     \`;
   `;
 
