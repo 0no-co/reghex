@@ -358,6 +358,23 @@ describe('non-capturing group', () => {
   );
 });
 
+describe('non-capturing shorthand', () => {
+  const node = match('node')`${/1/} :${/2/}+`;
+  it.each`
+    input    | result       | lastIndex
+    ${'12'}  | ${['1']}     | ${2}
+    ${'122'} | ${['1']}     | ${3}
+    ${'13'}  | ${undefined} | ${0}
+    ${'1'}   | ${undefined} | ${0}
+    ${'_'}   | ${undefined} | ${0}
+  `(
+    'should return $result when $input is passed',
+    ({ input, result, lastIndex }) => {
+      expectToParse(node, input, result, lastIndex);
+    }
+  );
+});
+
 describe('non-capturing group with plus matcher, then required matcher', () => {
   const node = match('node')`(?: ${/1/}+) ${/2/}`;
   it.each`
@@ -445,6 +462,22 @@ describe('positive lookahead group', () => {
   );
 });
 
+describe('positive lookahead shorthand', () => {
+  const node = match('node')`=${/1/} ${/\d/}`;
+  it.each`
+    input   | result       | lastIndex
+    ${'1'}  | ${['1']}     | ${1}
+    ${'13'} | ${['1']}     | ${1}
+    ${'2'}  | ${undefined} | ${0}
+    ${'_'}  | ${undefined} | ${0}
+  `(
+    'should return $result when $input is passed',
+    ({ input, result, lastIndex }) => {
+      expectToParse(node, input, result, lastIndex);
+    }
+  );
+});
+
 describe('positive lookahead group with plus matcher', () => {
   const node = match('node')`(?= ${/1/}+) ${/\d/}`;
   it.each`
@@ -484,6 +517,23 @@ describe('positive lookahead group with plus group and required matcher', () => 
 
 describe('negative lookahead group', () => {
   const node = match('node')`(?! ${/1/}) ${/\d/}`;
+  it.each`
+    input   | result       | lastIndex
+    ${'2'}  | ${['2']}     | ${1}
+    ${'23'} | ${['2']}     | ${1}
+    ${'1'}  | ${undefined} | ${0}
+    ${'1'}  | ${undefined} | ${0}
+    ${'_'}  | ${undefined} | ${0}
+  `(
+    'should return $result when $input is passed',
+    ({ input, result, lastIndex }) => {
+      expectToParse(node, input, result, lastIndex);
+    }
+  );
+});
+
+describe('negative lookahead shorthand', () => {
+  const node = match('node')`!${/1/} ${/\d/}`;
   it.each`
     input   | result       | lastIndex
     ${'2'}  | ${['2']}     | ${1}

@@ -12,6 +12,7 @@ export const parse = (quasis, expressions) => {
   let currentGroup = null;
   let lastMatch;
   let currentSequence = rootSequence;
+  let capture;
 
   for (
     let quasiIndex = 0, stackIndex = 0;
@@ -19,9 +20,9 @@ export const parse = (quasis, expressions) => {
     stackIndex++
   ) {
     if (stackIndex % 2 !== 0) {
-      currentSequence.push({
-        expression: expressions[stackIndex++ >> 1],
-      });
+      const expression = expressions[stackIndex++ >> 1];
+      currentSequence.push({ expression, capture });
+      capture = undefined;
     }
 
     const quasi = quasis[stackIndex >> 1];
@@ -36,12 +37,18 @@ export const parse = (quasis, expressions) => {
         if (!currentSequence) syntaxError(char);
       } else if (char === '(') {
         sequenceStack.push(currentSequence);
-        currentSequence.push((currentGroup = { sequence: [] }));
+        currentSequence.push((currentGroup = { sequence: [], capture }));
         currentSequence = currentGroup.sequence;
+        capture = undefined;
+      } else if (char === ':' || char === '=' || char === '!') {
+        capture = char;
+        const nextChar = quasi[quasiIndex];
+        if (quasi[quasiIndex] && quasi[quasiIndex] !== '(') syntaxError(char);
       } else if (char === '?' && !currentSequence.length && currentGroup) {
-        const nextChar = quasi[quasiIndex++];
-        if (nextChar === ':' || nextChar === '=' || nextChar === '!') {
-          currentGroup.capture = nextChar;
+        capture = quasi[quasiIndex++];
+        if (capture === ':' || capture === '=' || capture === '!') {
+          currentGroup.capture = capture;
+          capture = undefined;
         } else {
           syntaxError(char);
         }
