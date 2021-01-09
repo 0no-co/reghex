@@ -573,3 +573,17 @@ describe('interpolation parsing', () => {
     expect(parse(node)`1${1}3`).toBe(undefined);
   });
 });
+
+describe('string matching', () => {
+  const node = match('node')`
+    ${'1'}
+    ${'2'}
+  `;
+
+  it('matches strings', () => {
+    const expected = ['1', '2'];
+    expected.tag = 'node';
+    expect(parse(node)('12')).toEqual(expected);
+    expect(parse(node)('13')).toBe(undefined);
+  });
+});
