@@ -30,11 +30,17 @@ const astExpression = (ast, depth, opts) => {
   const restoreLength =
     (opts.length && opts.abort && js`${_node}.length = ln${opts.length};`) ||
     '';
-  const expression = `${ast.expression.id}(${_state})`;
+  const condition = `(${_match} = ${ast.expression.id}(${_state})) ${
+    capture ? '!=' : '=='
+  } null`;
   return js`
-    if ((${_match} = ${ast.expression.id}(${_state})) != null) {
-      ${capture ? js`${_node}.push(${_match})` : ''}
-    } else {
+    if (${condition}) ${
+    capture
+      ? js`{
+      ${_node}.push(${_match});
+    } else `
+      : ''
+  }{
       ${restoreIndex(opts.index)}
       ${restoreLength}
       ${opts.abort}

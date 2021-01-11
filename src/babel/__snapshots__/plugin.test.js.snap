@@ -185,7 +185,7 @@ const node = function (state) {
       break alt_3;
     }
 
-    if ((x = _node_expression3(state)) != null) {} else {
+    if ((x = _node_expression3(state)) == null) {
       state.y = y1;
       state.x = x1;
       node.length = ln2;
@@ -196,7 +196,7 @@ const node = function (state) {
       var y3 = state.y,
           x3 = state.x;
 
-      if ((x = _node_expression3(state)) != null) {} else {
+      if ((x = _node_expression3(state)) == null) {
         state.y = y3;
         state.x = x3;
         break loop_3;
