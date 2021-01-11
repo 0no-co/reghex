@@ -35,7 +35,6 @@ const astExpression = (ast, depth, opts) => {
     if ((${_match} = ${ast.expression.id}(${_state})) != null) {
       ${capture ? js`${_node}.push(${_match})` : ''}
     } else {
-      ${opts.onAbort}
       ${restoreIndex(opts.index)}
       ${restoreLength}
       ${opts.abort}
@@ -64,10 +63,9 @@ const astChild = (ast, depth, opts) =>
   ast.expression ? astExpression(ast, depth, opts) : astGroup(ast, depth, opts);
 
 const astQuantifier = (ast, depth, opts) => {
-  const { index, abort, onAbort } = opts;
+  const { index, abort } = opts;
   const invert = `inv_${depth}`;
   const loop = `loop_${depth}`;
-  const count = `j${depth}`;
 
   opts = copy(opts);
   if (ast.capture === '!') {
@@ -77,26 +75,16 @@ const astQuantifier = (ast, depth, opts) => {
 
   let child;
   if (ast.quantifier === '+') {
-    opts.onAbort = js`
-      if (${count}) {
-        ${restoreIndex(depth)}
-        break ${loop};
-      } else {
-        ${onAbort}
-      }
-    `;
-
+    const starAst = copy(ast);
+    starAst.quantifier = '*';
     child = js`
-      ${loop}: for (var ${count} = 0; 1; ${count}++) {
-        ${assignIndex(depth)}
-        ${astChild(ast, depth, opts)}
-      }
+      ${astChild(ast, depth, opts)}
+      ${astQuantifier(starAst, depth, opts)}
     `;
   } else if (ast.quantifier === '*') {
     opts.length = 0;
     opts.index = depth;
     opts.abort = js`break ${loop};`;
-    opts.onAbort = '';
 
     child = js`
       ${loop}: for (;;) {
@@ -107,7 +95,6 @@ const astQuantifier = (ast, depth, opts) => {
   } else if (ast.quantifier === '?') {
     opts.index = depth;
     opts.abort = '';
-    opts.onAbort = '';
 
     child = js`
       ${assignIndex(depth)}
@@ -149,7 +136,6 @@ const astSequence = (ast, depth, opts) => {
       childOpts = copy(opts);
       childOpts.index = depth;
       childOpts.abort = js`break ${block};`;
-      childOpts.onAbort = '';
     }
 
     let sequence = '';
@@ -188,7 +174,6 @@ const astRoot = (ast, name, transform) => {
       ${astSequence(ast, 2, {
         index: 1,
         length: 0,
-        onAbort: '',
         abort: js`return;`,
         capture: true,
       })}
