@@ -248,6 +248,15 @@ available operators are the following:
 | `(?= )`  | `(?= ${/1/})`      | A **positive lookahead** checks whether interpolations match, and if so continues the matcher without changing the input. If it matches, it's essentially ignored.                       |
 | `(?! )`  | `(?! ${/1/})`      | A **negative lookahead** checks whether interpolations _don't_ match, and if so continues the matcher without changing the input. If the interpolations do match the matcher is aborted. |
 
+A couple of operators also support "short hands" that allow you to write
+lookaheads or non-capturing groups a little quicker.
+
+| Shorthand | Example   | Description                                                                                                                                                                              |
+| --------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `:`       | `:${/1/}` | A **non-capturing group** is like a regular group, but the interpolations matched inside it don't appear in the parser's output.                                                         |
+| `=`       | `=${/1/}` | A **positive lookahead** checks whether interpolations match, and if so continues the matcher without changing the input. If it matches, it's essentially ignored.                       |
+| `!`       | `!${/1/}` | A **negative lookahead** checks whether interpolations _don't_ match, and if so continues the matcher without changing the input. If the interpolations do match the matcher is aborted. |
+
 We can combine and compose these operators to create more complex matchers.
 For instance, we can extend the original example to only allow a specific set
 of names by using the `|` operator:
@@ -345,8 +354,8 @@ parse(name)('var_name'); // { type: "Identifier", name: "var_name" }
 
 We've now entirely changed the output of the parser for this matcher. Given that each
 matcher can change its output, we're free to change the parser's output entirely.
-By **returning a falsy value** in this matcher, we can also change the matcher to not have
-matched, which would cause other matchers to treat it like a mismatch!
+By returning `null` or `undefined` in this matcher, we can also change the matcher
+to not have matched, which would cause other matchers to treat it like a mismatch!
 
 ```js
 import { match, parse } from 'reghex';
@@ -373,6 +382,42 @@ import { tag } from 'reghex';
 
 tag(['test'], 'node_name');
 // ["test", .tag = "node_name"]
+```
+
+### Tagged Template Parsing
+
+Any grammar in RegHex can also be used to parse a tagged template literal.
+A tagged template literal consists of a list of literals alternating with
+a list of "interpolations".
+
+In RegHex we can add an `interpolation` matcher to our grammars to allow it
+to parse interpolations in a template literal.
+
+```js
+import { interpolation } from 'reghex';
+
+const anyNumber = interpolation((x) => typeof x === 'number');
+
+const num = match('num')`
+  ${/[+-]?/} ${anyNumber}
+`;
+
+parse(num)`+${42}`;
+// ["+", 42, .tag = "num"]
+```
+
+This grammar now allows us to match arbitrary values if they're input into the
+parser. We can now call our grammar using a tagged template literal themselves
+to parse this.
+
+```js
+import { interpolation } from 'reghex';
+
+const anyNumber = interpolation((x) => typeof x === 'number');
+
+const num = match('num')`
+  ${/[+-]?/} ${anyNumber}
+`;
 ```
 
 **That's it! May the RegExp be ever in your favor.**
