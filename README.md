@@ -410,14 +410,4 @@ This grammar now allows us to match arbitrary values if they're input into the
 parser. We can now call our grammar using a tagged template literal themselves
 to parse this.
 
-```js
-import { interpolation } from 'reghex';
-
-const anyNumber = interpolation((x) => typeof x === 'number');
-
-const num = match('num')`
-  ${/[+-]?/} ${anyNumber}
-`;
-```
-
 **That's it! May the RegExp be ever in your favor.**
