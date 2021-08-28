@@ -192,14 +192,14 @@ const node = function (state) {
       return;
     }
 
-    loop_3: for (;;) {
+    group_3: for (;;) {
       var y3 = state.y,
           x3 = state.x;
 
       if ((x = _node_expression3(state)) == null) {
         state.y = y3;
         state.x = x3;
-        break loop_3;
+        break group_3;
       }
     }
   }
@@ -277,7 +277,7 @@ const node = function (state) {
         break block_2;
       }
 
-      loop_2: for (;;) {
+      group_2: for (;;) {
         var y2 = state.y,
             x2 = state.x;
 
@@ -286,7 +286,7 @@ const node = function (state) {
         } else {
           state.y = y2;
           state.x = x2;
-          break loop_2;
+          break group_2;
         }
       }
 
@@ -301,7 +301,7 @@ const node = function (state) {
       return;
     }
 
-    loop_2: for (;;) {
+    group_2: for (;;) {
       var y2 = state.y,
           x2 = state.x;
 
@@ -310,11 +310,11 @@ const node = function (state) {
       } else {
         state.y = y2;
         state.x = x2;
-        break loop_2;
+        break group_2;
       }
     }
 
-    loop_2: for (;;) {
+    group_2: for (;;) {
       var y2 = state.y,
           x2 = state.x;
       var ln2 = node.length;
@@ -325,17 +325,21 @@ const node = function (state) {
         state.y = y2;
         state.x = x2;
         node.length = ln2;
-        break loop_2;
+        break group_2;
       }
 
-      var y4 = state.y,
-          x4 = state.x;
+      group_4: {
+        var y4 = state.y,
+            x4 = state.x;
 
-      if ((x = _node_expression4(state)) != null) {
-        node.push(x);
-      } else {
-        state.y = y4;
-        state.x = x4;
+        if ((x = _node_expression4(state)) != null) {
+          node.push(x);
+        } else {
+          state.y = y4;
+          state.x = x4;
+          node.length = ln2;
+          break group_4;
+        }
       }
 
       if ((x = _node_expression5(state)) != null) {
@@ -344,7 +348,7 @@ const node = function (state) {
         state.y = y2;
         state.x = x2;
         node.length = ln2;
-        break loop_2;
+        break group_2;
       }
     }
   }

@@ -115,6 +115,7 @@ describe('optional group then required matcher', () => {
     input    | result
     ${'123'} | ${['1', '2', '3']}
     ${'3'}   | ${['3']}
+    ${'23'}  | ${undefined}
     ${'_'}   | ${undefined}
   `('should return $result when $input is passed', ({ input, result }) => {
     expectToParse(node, input, result);
@@ -128,6 +129,7 @@ describe('star group then required matcher', () => {
     ${'123'}   | ${['1', '2', '3']}
     ${'12123'} | ${['1', '2', '1', '2', '3']}
     ${'3'}     | ${['3']}
+    ${'23'}    | ${undefined}
     ${'13'}    | ${undefined}
     ${'_'}     | ${undefined}
   `('should return $result when $input is passed', ({ input, result }) => {
@@ -141,6 +143,7 @@ describe('plus group then required matcher', () => {
     input      | result
     ${'123'}   | ${['1', '2', '3']}
     ${'12123'} | ${['1', '2', '1', '2', '3']}
+    ${'23'}    | ${undefined}
     ${'3'}     | ${undefined}
     ${'13'}    | ${undefined}
     ${'_'}     | ${undefined}

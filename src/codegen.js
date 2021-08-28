@@ -71,7 +71,7 @@ const astChild = (ast, depth, opts) =>
 const astQuantifier = (ast, depth, opts) => {
   const { index, abort } = opts;
   const invert = `inv_${depth}`;
-  const loop = `loop_${depth}`;
+  const group = `group_${depth}`;
 
   opts = copy(opts);
   if (ast.capture === '!') {
@@ -90,21 +90,23 @@ const astQuantifier = (ast, depth, opts) => {
   } else if (ast.quantifier === '*') {
     opts.length = 0;
     opts.index = depth;
-    opts.abort = js`break ${loop};`;
+    opts.abort = js`break ${group};`;
 
     child = js`
-      ${loop}: for (;;) {
+      ${group}: for (;;) {
         ${assignIndex(depth)}
         ${astChild(ast, depth, opts)}
       }
     `;
   } else if (ast.quantifier === '?') {
     opts.index = depth;
-    opts.abort = '';
+    opts.abort = js`break ${group}`;
 
     child = js`
-      ${assignIndex(depth)}
-      ${astChild(ast, depth, opts)}
+      ${group}: {
+        ${assignIndex(depth)}
+        ${astChild(ast, depth, opts)}
+      }
     `;
   } else {
     child = astChild(ast, depth, opts);
