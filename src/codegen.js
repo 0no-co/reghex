@@ -98,6 +98,14 @@ const astQuantifier = (ast, depth, opts) => {
         ${astChild(ast, depth, opts)}
       }
     `;
+  } else if (ast.quantifier === '?' && ast.expression) {
+    opts.index = depth;
+    opts.abort = '';
+
+    child = js`
+      ${assignIndex(depth)}
+      ${astChild(ast, depth, opts)}
+    `;
   } else if (ast.quantifier === '?') {
     opts.index = depth;
     opts.abort = js`break ${group}`;

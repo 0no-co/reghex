@@ -328,18 +328,14 @@ const node = function (state) {
         break group_2;
       }
 
-      group_4: {
-        var y4 = state.y,
-            x4 = state.x;
+      var y4 = state.y,
+          x4 = state.x;
 
-        if ((x = _node_expression4(state)) != null) {
-          node.push(x);
-        } else {
-          state.y = y4;
-          state.x = x4;
-          node.length = ln2;
-          break group_4;
-        }
+      if ((x = _node_expression4(state)) != null) {
+        node.push(x);
+      } else {
+        state.y = y4;
+        state.x = x4;
       }
 
       if ((x = _node_expression5(state)) != null) {
