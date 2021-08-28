@@ -16,6 +16,21 @@ it('works with standard features', () => {
   ).toMatchSnapshot();
 });
 
+it('works with nameless matchers', () => {
+  const code = `
+    import { match } from 'reghex/macro';
+
+    const node = match()\`
+      \${1}+ | \${2}+ (\${3} ( \${4}? \${5} ) )*
+    \`;
+  `;
+
+  expect(
+    transform(code, { babelrc: false, presets: [], plugins: [reghexPlugin] })
+      .code
+  ).toMatchSnapshot();
+});
+
 it('works while only minifying', () => {
   const code = `
     import { match } from 'reghex/macro';

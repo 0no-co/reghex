@@ -194,7 +194,7 @@ const astRoot = (ast, name, transform) => {
         capture: true,
       })}
 
-      ${_node}.tag = ${name};
+      if (${name}) ${_node}.tag = ${name};
       return ${transform ? js`(${transform})(${_node})` : _node};
     })
   `;

@@ -83,14 +83,16 @@ export function makeHelpers({ types: t, template }) {
     getMatchName(path) {
       t.assertTaggedTemplateExpression(path.node);
       const nameArgumentPath = path.get('tag.arguments.0');
-      const { confident, value } = nameArgumentPath.evaluate();
-      if (!confident && t.isIdentifier(nameArgumentPath.node)) {
-        return nameArgumentPath.node.name;
-      } else if (confident && typeof value === 'string') {
-        return value;
-      } else {
-        return path.scope.generateUidIdentifierBasedOnNode(path.node);
+      if (nameArgumentPath) {
+        const { confident, value } = nameArgumentPath.evaluate();
+        if (!confident && t.isIdentifier(nameArgumentPath.node)) {
+          return nameArgumentPath.node.name;
+        } else if (confident && typeof value === 'string') {
+          return value;
+        }
       }
+
+      return path.scope.generateUidIdentifierBasedOnNode(path.node);
     },
 
     /** Given a match, hoists its expressions in front of the match's statement */
@@ -194,14 +196,6 @@ export function makeHelpers({ types: t, template }) {
     },
 
     minifyMatch(path) {
-      if (!path.node.tag.arguments.length) {
-        throw path
-          .get('tag')
-          .buildCodeFrameError(
-            'match() must at least be called with a node name'
-          );
-      }
-
       const quasis = path.node.quasi.quasis.map((x) =>
         t.stringLiteral(x.value.cooked.replace(/\s*/g, ''))
       );
@@ -217,15 +211,11 @@ export function makeHelpers({ types: t, template }) {
     },
 
     transformMatch(path) {
-      if (!path.node.tag.arguments.length) {
-        throw path
-          .get('tag')
-          .buildCodeFrameError(
-            'match() must at least be called with a node name'
-          );
+      let name = path.node.tag.arguments[0];
+      if (!name) {
+        name = t.nullLiteral();
       }
 
-      const name = path.node.tag.arguments[0];
       const quasis = path.node.quasi.quasis.map((x) => x.value.cooked);
 
       const expressions = this._prepareExpressions(path);

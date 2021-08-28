@@ -15,6 +15,14 @@ const expectToParse = (node, input, result, lastIndex = 0) => {
   }
 };
 
+describe('can create nameless matchers', () => {
+  it('matches without tagging', () => {
+    const state = { quasis: ['1'], expressions: [], x: 0, y: 0 };
+    const node = match(null)`${/1/}`;
+    expect(node(state)).toEqual(['1']);
+  });
+});
+
 describe('required matcher', () => {
   const node = match('node')`${/1/}`;
   it.each`
