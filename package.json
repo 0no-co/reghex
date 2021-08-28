@@ -1,6 +1,6 @@
 {
   "name": "reghex",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "The magical sticky regex-based parser generator 🧙",
   "author": "Phil Pluckthun <phil@kitten.sh>",
   "license": "MIT",
